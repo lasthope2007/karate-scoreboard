@@ -17,6 +17,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/z_score_icon.png
     - assets/countdown.wav
     - assets/match_end.wav
 
