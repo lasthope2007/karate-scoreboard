@@ -30,6 +30,11 @@ jobs:
           channel: stable
           cache: true
 
+      # This repository currently contains Dart source but no android/ platform folder.
+      # Generate the standard Android project files before building the APK.
+      - name: Generate Android platform files
+        run: flutter create --platforms=android --project-name=karate_scoreboard .
+
       - name: Install dependencies
         run: flutter pub get
 
