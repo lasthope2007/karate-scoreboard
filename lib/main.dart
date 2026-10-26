@@ -154,7 +154,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
 
       setState(() => remainingSeconds--);
-      if (remainingSeconds <= 15 && remainingSeconds > 0) _playCountdownSound();
+      if (remainingSeconds == 15) _playCountdownSound();
     });
   }
 
@@ -532,42 +532,46 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text('IPPON $ippon  •  WAZA-ARI $wazaAri', style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 3),
-            Wrap(alignment: WrapAlignment.center, spacing: 3, runSpacing: 2, children: [
-              _smallToggle('SENSHU', senshu, color, () => _toggleSenshu(isAka)),
-              _smallToggle('CHUI 1', penalties.contains('CHUI 1'), color, () => _togglePenalty(isAka, 'CHUI 1')),
-              _smallToggle('CHUI 2', penalties.contains('CHUI 2'), color, () => _togglePenalty(isAka, 'CHUI 2')),
-              _smallToggle('CHUI 3', penalties.contains('CHUI 3'), color, () => _togglePenalty(isAka, 'CHUI 3')),
-              _smallToggle('HANSOKU-CHUI', penalties.contains('HANSOKU-CHUI'), color, () => _togglePenalty(isAka, 'HANSOKU-CHUI')),
-              _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU')),
-            ]),
-            const SizedBox(height: 3),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            const SizedBox(height: 5),
+            Text('IPPON  $ippon     •     WAZA-ARI  $wazaAri', style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 5),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _toggleSenshu(isAka),
+                icon: Icon(senshu ? Icons.check_circle : Icons.radio_button_unchecked, size: 20),
+                label: Text(senshu ? 'SENSHU AWARDED' : 'AWARD SENSHU', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2, fontSize: 12)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: senshu ? Colors.black : color,
+                  backgroundColor: senshu ? color : color.withValues(alpha: 0.08),
+                  side: BorderSide(color: color, width: senshu ? 2.5 : 1.5),
+                  minimumSize: const Size(0, 42),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 6,
+              runSpacing: 5,
               children: [
-                Text(
-                  'WARNINGS  ${isAka ? akaFouls : aoFouls}',
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '−',
-                  color: Colors.white70,
-                  onPressed: () => _changeFouls(isAka, -1),
-                ),
-                const SizedBox(width: 4),
-                _scoreButton(
-                  label: '+',
-                  color: color,
-                  onPressed: () => _changeFouls(isAka, 1),
-                ),
+                _smallToggle('CHUI 1', penalties.contains('CHUI 1'), color, () => _togglePenalty(isAka, 'CHUI 1')),
+                _smallToggle('CHUI 2', penalties.contains('CHUI 2'), color, () => _togglePenalty(isAka, 'CHUI 2')),
+                _smallToggle('CHUI 3', penalties.contains('CHUI 3'), color, () => _togglePenalty(isAka, 'CHUI 3')),
+                _smallToggle('HANSOKU-CHUI', penalties.contains('HANSOKU-CHUI'), color, () => _togglePenalty(isAka, 'HANSOKU-CHUI')),
+                _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU')),
               ],
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
+              child: Text(
+                'WARNINGS  \${isAka ? akaFouls : aoFouls}',
+                style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -578,8 +582,16 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   Widget _smallToggle(String label, bool active, Color color, VoidCallback onTap) {
     return OutlinedButton(
       onPressed: onTap,
-      style: OutlinedButton.styleFrom(foregroundColor: active ? Colors.black : color, backgroundColor: active ? color : Colors.transparent, padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1), minimumSize: const Size(0, 24), tapTargetSize: MaterialTapTargetSize.shrinkWrap, side: BorderSide(color: active ? color : color.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-      child: Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: active ? Colors.black : color,
+        backgroundColor: active ? color : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        minimumSize: const Size(0, 34),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        side: BorderSide(color: active ? color : color.withValues(alpha: 0.65), width: active ? 2 : 1),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
     );
   }
 
@@ -592,10 +604,10 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       style: FilledButton.styleFrom(
         backgroundColor: color.withValues(alpha: 0.16),
         foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+        minimumSize: const Size(52, 46),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: onPressed,
       child: Text(
@@ -728,11 +740,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                     tooltip: 'Match duration',
                     onPressed: _chooseDuration,
                     icon: const Icon(Icons.timer_outlined),
-                  ),
-                  IconButton(
-                    tooltip: 'Undo',
-                    onPressed: _undo,
-                    icon: const Icon(Icons.undo),
                   ),
                   IconButton(
                     tooltip: 'Reset match',
