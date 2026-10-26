@@ -51,6 +51,10 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   int aoScore = 0;
   int akaFouls = 0;
   int aoFouls = 0;
+  int akaIppon = 0, aoIppon = 0, akaWazaAri = 0, aoWazaAri = 0;
+  bool akaSenshu = false, aoSenshu = false;
+  final Set<String> akaPenalties = <String>{};
+  final Set<String> aoPenalties = <String>{};
   int matchDuration = 120;
   int remainingSeconds = 120;
 
@@ -106,6 +110,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         aoScore: aoScore,
         akaFouls: akaFouls,
         aoFouls: aoFouls,
+        akaIppon: akaIppon, aoIppon: aoIppon,
+        akaWazaAri: akaWazaAri, aoWazaAri: aoWazaAri,
+        akaSenshu: akaSenshu, aoSenshu: aoSenshu,
+        akaPenalties: Set<String>.from(akaPenalties),
+        aoPenalties: Set<String>.from(aoPenalties),
         remainingSeconds: remainingSeconds,
         isRunning: isRunning,
         matchFinished: matchFinished,
@@ -131,7 +140,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
 
       if (remainingSeconds <= 1) {
         t.cancel();
-        _playAlert();
         setState(() {
           remainingSeconds = 0;
           isRunning = false;
@@ -142,7 +150,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
 
       setState(() => remainingSeconds--);
-      if (remainingSeconds <= 15) _playAlert();
+      if (remainingSeconds <= 15 && remainingSeconds > 0) _playAlert();
+      if (remainingSeconds == 0) _playAlert();
     });
   }
 
@@ -159,6 +168,10 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       aoScore = 0;
       akaFouls = 0;
       aoFouls = 0;
+      akaIppon = aoIppon = akaWazaAri = aoWazaAri = 0;
+      akaSenshu = aoSenshu = false;
+      akaPenalties.clear();
+      aoPenalties.clear();
       remainingSeconds = matchDuration;
       isRunning = false;
       matchFinished = false;
@@ -176,8 +189,12 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     setState(() {
       if (isAka) {
         akaScore = (akaScore + points).clamp(0, 99);
+        if (points == 3) akaIppon++;
+        if (points == 2) akaWazaAri++;
       } else {
         aoScore = (aoScore + points).clamp(0, 99);
+        if (points == 3) aoIppon++;
+        if (points == 2) aoWazaAri++;
       }
     });
 
@@ -196,6 +213,31 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         aoFouls = (aoFouls + delta).clamp(0, 99);
       }
     });
+  }
+
+  void _toggleSenshu(bool isAka) {
+    if (matchFinished) return;
+    _saveHistory();
+    setState(() {
+      if (isAka) { akaSenshu = !akaSenshu; if (akaSenshu) aoSenshu = false; }
+      else { aoSenshu = !aoSenshu; if (aoSenshu) akaSenshu = false; }
+    });
+  }
+
+  void _togglePenalty(bool isAka, String penalty) {
+    if (matchFinished) return;
+    _saveHistory();
+    setState(() {
+      final p = isAka ? akaPenalties : aoPenalties;
+      if (p.contains(penalty)) { p.remove(penalty); }
+      else {
+        p.add(penalty);
+        if (penalty == 'HANSOKU') { isRunning = false; timer?.cancel(); matchFinished = true; }
+      }
+    });
+    if (penalty == 'HANSOKU' && (isAka ? akaPenalties.contains(penalty) : aoPenalties.contains(penalty))) {
+      _playAlert(); _startWinnerBlink();
+    }
   }
 
   void _adjustTime(int delta) {
@@ -236,6 +278,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       aoScore = previous.aoScore;
       akaFouls = previous.akaFouls;
       aoFouls = previous.aoFouls;
+      akaIppon = previous.akaIppon; aoIppon = previous.aoIppon;
+      akaWazaAri = previous.akaWazaAri; aoWazaAri = previous.aoWazaAri;
+      akaSenshu = previous.akaSenshu; aoSenshu = previous.aoSenshu;
+      akaPenalties..clear()..addAll(previous.akaPenalties);
+      aoPenalties..clear()..addAll(previous.aoPenalties);
       remainingSeconds = previous.remainingSeconds;
       isRunning = false;
       matchFinished = previous.matchFinished;
@@ -267,10 +314,17 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         '${secs.toString().padLeft(2, '0')}';
   }
 
+  bool get _akaHansoku => akaPenalties.contains('HANSOKU');
+  bool get _aoHansoku => aoPenalties.contains('HANSOKU');
+
   String get _winner {
-    if (akaScore > aoScore) return akaName;
-    if (aoScore > akaScore) return aoName;
-    return 'DRAW';
+    if (_akaHansoku && !_aoHansoku) return aoName;
+    if (_aoHansoku && !_akaHansoku) return akaName;
+    if (akaScore != aoScore) return akaScore > aoScore ? akaName : aoName;
+    if (akaSenshu != aoSenshu) return akaSenshu ? akaName : aoName;
+    if (akaIppon != aoIppon) return akaIppon > aoIppon ? akaName : aoName;
+    if (akaWazaAri != aoWazaAri) return akaWazaAri > aoWazaAri ? akaName : aoName;
+    return 'HANTEI REQUIRED';
   }
 
   Future<void> _editNames() async {
@@ -402,14 +456,20 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     required Color color,
     required bool isAka,
   }) {
+    final isWinner = matchFinished && ((_winner == akaName && isAka) || (_winner == aoName && !isAka));
+    final penalties = isAka ? akaPenalties : aoPenalties;
+    final senshu = isAka ? akaSenshu : aoSenshu;
+    final ippon = isAka ? akaIppon : aoIppon;
+    final wazaAri = isAka ? akaWazaAri : aoWazaAri;
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: panelColor,
+          color: isWinner ? color.withValues(alpha: 0.32) : panelColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: color.withValues(alpha: 0.8), width: 2),
+          border: Border.all(color: color, width: isWinner ? 5 : 2),
+          boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.65), blurRadius: 28, spreadRadius: 4)] : const [],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -425,16 +485,12 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                 letterSpacing: 3,
               ),
             ),
-            Text(
-              '$score',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 88,
-                height: 1,
-                fontWeight: FontWeight.w900,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
+            if (isWinner)
+              FadeTransition(opacity: _winnerOpacity, child: Text('WINNER', style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 3))),
+            if (isWinner)
+              FadeTransition(opacity: _winnerOpacity, child: Text('$score', style: TextStyle(color: color, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: const [FontFeature.tabularFigures()])))
+            else
+              Text('$score', style: const TextStyle(color: Colors.white, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: [FontFeature.tabularFigures()])),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -463,12 +519,23 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
+            Text('IPPON $ippon  •  WAZA-ARI $wazaAri', style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 3),
+            Wrap(alignment: WrapAlignment.center, spacing: 3, runSpacing: 2, children: [
+              _smallToggle('SENSHU', senshu, color, () => _toggleSenshu(isAka)),
+              _smallToggle('CHUI 1', penalties.contains('CHUI 1'), color, () => _togglePenalty(isAka, 'CHUI 1')),
+              _smallToggle('CHUI 2', penalties.contains('CHUI 2'), color, () => _togglePenalty(isAka, 'CHUI 2')),
+              _smallToggle('CHUI 3', penalties.contains('CHUI 3'), color, () => _togglePenalty(isAka, 'CHUI 3')),
+              _smallToggle('HANSOKU-CHUI', penalties.contains('HANSOKU-CHUI'), color, () => _togglePenalty(isAka, 'HANSOKU-CHUI')),
+              _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU')),
+            ]),
+            const SizedBox(height: 3),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'FOULS / WARNINGS  ${isAka ? akaFouls : aoFouls}',
+                  'WARNINGS  ${isAka ? akaFouls : aoFouls}',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 11,
@@ -492,6 +559,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           ],
         ),
       ),
+    );
+  }
+
+  Widget _smallToggle(String label, bool active, Color color, VoidCallback onTap) {
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(foregroundColor: active ? Colors.black : color, backgroundColor: active ? color : Colors.transparent, padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1), minimumSize: const Size(0, 24), tapTargetSize: MaterialTapTargetSize.shrinkWrap, side: BorderSide(color: active ? color : color.withValues(alpha: 0.5)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+      child: Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900)),
     );
   }
 
@@ -725,10 +800,12 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
 
 class _ScoreSnapshot {
   const _ScoreSnapshot({
-    required this.akaScore,
-    required this.aoScore,
-    required this.akaFouls,
-    required this.aoFouls,
+    required this.akaScore, required this.aoScore,
+    required this.akaFouls, required this.aoFouls,
+    required this.akaIppon, required this.aoIppon,
+    required this.akaWazaAri, required this.aoWazaAri,
+    required this.akaSenshu, required this.aoSenshu,
+    required this.akaPenalties, required this.aoPenalties,
     required this.remainingSeconds,
     required this.isRunning,
     required this.matchFinished,
@@ -736,8 +813,10 @@ class _ScoreSnapshot {
 
   final int akaScore;
   final int aoScore;
-  final int akaFouls;
-  final int aoFouls;
+  final int akaFouls, aoFouls;
+  final int akaIppon, aoIppon, akaWazaAri, aoWazaAri;
+  final bool akaSenshu, aoSenshu;
+  final Set<String> akaPenalties, aoPenalties;
   final int remainingSeconds;
   final bool isRunning;
   final bool matchFinished;
