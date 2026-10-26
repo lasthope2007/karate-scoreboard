@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<rect width="1024" height="1024" rx="210" fill="#050607"/>
+<path d="M220 565 L510 255 L775 255 L480 565 L710 565 L825 470 L700 675 L400 675 L565 495 L375 495 Z" fill="#fff" opacity=".97"/>
+<path d="M390 300 C370 265 400 220 445 228 L480 245 L500 260 L475 270 L465 310 L480 345 L458 365 L440 350 L420 365 L405 350 L390 330 Z" fill="#07090c"/>
+<path d="M415 355 L355 390 L330 450 L365 475 L405 420 L460 415 L520 440 L585 405 L610 425 L540 470 L455 460 L430 510 L390 500 L390 450 L350 490 L310 465 L330 405 Z" fill="#fff"/>
+<path d="M470 400 L600 385 L690 345 L725 365 L635 420 L520 450 Z" fill="#fff"/>
+<path d="M610 382 L765 335 L790 360 L660 430 Z" fill="#080a0d"/>
+<path d="M360 455 L430 475 L480 525 L460 555 L405 520 L355 510 Z" fill="#fff"/>
+<path d="M160 405 L270 405 L255 535 L145 535 L135 450 Z" fill="#e21b2d"/>
+<path d="M750 405 L860 405 L890 450 L890 535 L780 535 Z" fill="#1479ee"/>
+<g fill="#fff" font-family="Arial,sans-serif" font-weight="900" text-anchor="middle"><text x="200" y="500" font-size="82">0</text><text x="820" y="500" font-size="82">0</text></g>
+<path d="M160 550 H250" stroke="#e21b2d" stroke-width="12"/><path d="M775 550 H865" stroke="#1479ee" stroke-width="12"/>
+<text x="512" y="790" font-family="Arial,sans-serif" font-style="italic" font-weight="900" font-size="145" text-anchor="middle" fill="#fff">Z-Score</text>
+<path d="M350 815 L390 815 L400 785 L360 785 Z" fill="#e21b2d"/>
+</svg>
