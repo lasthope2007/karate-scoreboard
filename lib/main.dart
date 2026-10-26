@@ -65,6 +65,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   bool isRunning = false;
   bool matchFinished = false;
   bool isFullscreen = false;
+  bool sidesSwitched = false;
 
   Timer? timer;
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -202,6 +203,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
 
       setState(() => remainingSeconds--);
+      // One clear referee whistle exactly when the final 15 seconds begin.
       if (remainingSeconds == 15) _playCountdownSound();
     });
   }
@@ -547,6 +549,27 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     final ippon = isAka ? akaIppon : aoIppon;
     final wazaAri = isAka ? akaWazaAri : aoWazaAri;
 
+    Widget senshuControl() => Tooltip(
+      message: senshu ? 'Remove Senshu' : 'Award Senshu',
+      child: Material(
+        color: senshu ? color : color.withValues(alpha: 0.12),
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () => _toggleSenshu(isAka),
+          child: SizedBox(
+            width: 42,
+            height: 42,
+            child: Icon(
+              senshu ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: senshu ? Colors.black : color,
+              size: 25,
+            ),
+          ),
+        ),
+      ),
+    );
+
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8),
@@ -563,42 +586,28 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
           children: [
-            // Keep Senshu visible in the header, so the referee never needs to scroll.
+            // Senshu stays in the top corner: AKA right, AO left.
             Row(
               children: [
+                if (!isAka) senshuControl(),
                 Expanded(
-                  child: Text(
-                    name.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 3,
-                    ),
-                  ),
-                ),
-                Tooltip(
-                  message: senshu ? 'Remove Senshu' : 'Award Senshu',
-                  child: Material(
-                    color: senshu ? color : color.withValues(alpha: 0.12),
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => _toggleSenshu(isAka),
-                      child: SizedBox(
-                        width: 42,
-                        height: 42,
-                        child: Icon(
-                          senshu ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: senshu ? Colors.black : color,
-                          size: 25,
-                        ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      name.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: isAka ? TextAlign.end : TextAlign.start,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 3,
                       ),
                     ),
                   ),
                 ),
+                if (isAka) senshuControl(),
               ],
             ),
             if (isWinner)
@@ -808,7 +817,16 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
             children: [
               Row(
                 children: [
-                  const Icon(Icons.sports_martial_arts, color: goldColor),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/z_score_icon.png',
+                      width: 38,
+                      height: 38,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.sports_martial_arts, color: goldColor, size: 30),
+                    ),
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'Z-SCORE SCOREBOARD',
@@ -834,6 +852,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                     icon: const Icon(Icons.timer_outlined),
                   ),
                   IconButton(
+                    tooltip: 'Switch sides',
+                    onPressed: () {
+                      setState(() => sidesSwitched = !sidesSwitched);
+                      _logEvent('SIDE POSITIONS SWITCHED');
+                    },
+                    icon: const Icon(Icons.swap_horiz),
+                  ),
+                  IconButton(
                     tooltip: 'Reset match',
                     onPressed: _resetMatch,
                     icon: const Icon(Icons.restart_alt),
@@ -857,19 +883,35 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _scorePanel(
-                      name: akaName,
-                      score: akaScore,
-                      color: akaColor,
-                      isAka: true,
-                    ),
-                    _centerPanel(),
-                    _scorePanel(
-                      name: aoName,
-                      score: aoScore,
-                      color: aoColor,
-                      isAka: false,
-                    ),
+                    if (sidesSwitched) ...[
+                      _scorePanel(
+                        name: aoName,
+                        score: aoScore,
+                        color: aoColor,
+                        isAka: false,
+                      ),
+                      _centerPanel(),
+                      _scorePanel(
+                        name: akaName,
+                        score: akaScore,
+                        color: akaColor,
+                        isAka: true,
+                      ),
+                    ] else ...[
+                      _scorePanel(
+                        name: akaName,
+                        score: akaScore,
+                        color: akaColor,
+                        isAka: true,
+                      ),
+                      _centerPanel(),
+                      _scorePanel(
+                        name: aoName,
+                        score: aoScore,
+                        color: aoColor,
+                        isAka: false,
+                      ),
+                    ],
                   ],
                 ),
               ),
