@@ -21,7 +21,7 @@ class KarateScoreboardApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Karate Elite',
+      title: 'Z-Score',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -44,11 +44,13 @@ class ScoreboardPage extends StatefulWidget {
   State<ScoreboardPage> createState() => _ScoreboardPageState();
 }
 
-class _ScoreboardPageState extends State<ScoreboardPage> {
+class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProviderStateMixin {
   static const int maxScore = 8;
 
   int akaScore = 0;
   int aoScore = 0;
+  int akaFouls = 0;
+  int aoFouls = 0;
   int matchDuration = 120;
   int remainingSeconds = 120;
 
@@ -60,12 +62,21 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
   bool isFullscreen = false;
 
   Timer? timer;
+  late final AnimationController _blinkController;
+  late final Animation<double> _winnerOpacity;
 
   final List<_ScoreSnapshot> history = [];
 
   @override
   void initState() {
     super.initState();
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _winnerOpacity = Tween<double>(begin: 0.25, end: 1).animate(
+      CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
+    );
     _setLandscape();
   }
 
@@ -82,6 +93,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
   @override
   void dispose() {
     timer?.cancel();
+    _blinkController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
@@ -92,6 +104,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
       _ScoreSnapshot(
         akaScore: akaScore,
         aoScore: aoScore,
+        akaFouls: akaFouls,
+        aoFouls: aoFouls,
         remainingSeconds: remainingSeconds,
         isRunning: isRunning,
         matchFinished: matchFinished,
@@ -117,15 +131,18 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
 
       if (remainingSeconds <= 1) {
         t.cancel();
+        _playAlert();
         setState(() {
           remainingSeconds = 0;
           isRunning = false;
           matchFinished = true;
         });
+        _startWinnerBlink();
         return;
       }
 
       setState(() => remainingSeconds--);
+      if (remainingSeconds <= 15) _playAlert();
     });
   }
 
@@ -140,10 +157,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
     setState(() {
       akaScore = 0;
       aoScore = 0;
+      akaFouls = 0;
+      aoFouls = 0;
       remainingSeconds = matchDuration;
       isRunning = false;
       matchFinished = false;
       history.clear();
+      _blinkController.stop();
+      _blinkController.reset();
     });
   }
 
@@ -165,6 +186,44 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
     }
   }
 
+  void _changeFouls(bool isAka, int delta) {
+    if (matchFinished) return;
+    _saveHistory();
+    setState(() {
+      if (isAka) {
+        akaFouls = (akaFouls + delta).clamp(0, 99);
+      } else {
+        aoFouls = (aoFouls + delta).clamp(0, 99);
+      }
+    });
+  }
+
+  void _adjustTime(int delta) {
+    if (matchFinished) return;
+    _saveHistory();
+    setState(() {
+      remainingSeconds = (remainingSeconds + delta).clamp(0, 599);
+    });
+    if (remainingSeconds == 0) _finishMatch();
+  }
+
+  Future<void> _playAlert() async {
+    try {
+      await SystemSound.play(SystemSoundType.alert);
+    } catch (_) {
+      // Some Android devices or system profiles may silence system alerts.
+    }
+  }
+
+  void _startWinnerBlink() {
+    if (akaScore == aoScore) {
+      _blinkController.stop();
+      _blinkController.reset();
+      return;
+    }
+    _blinkController.repeat(reverse: true);
+  }
+
   void _undo() {
     if (history.isEmpty) return;
 
@@ -175,10 +234,18 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
     setState(() {
       akaScore = previous.akaScore;
       aoScore = previous.aoScore;
+      akaFouls = previous.akaFouls;
+      aoFouls = previous.aoFouls;
       remainingSeconds = previous.remainingSeconds;
       isRunning = false;
       matchFinished = previous.matchFinished;
     });
+    if (matchFinished) {
+      _startWinnerBlink();
+    } else {
+      _blinkController.stop();
+      _blinkController.reset();
+    }
   }
 
   void _finishMatch() {
@@ -188,6 +255,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
       isRunning = false;
       matchFinished = true;
     });
+    _playAlert();
+    _startWinnerBlink();
   }
 
   String _formatTime(int seconds) {
@@ -286,6 +355,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
     if (selected != null && mounted) {
       timer?.cancel();
 
+      _blinkController.stop();
+      _blinkController.reset();
       setState(() {
         matchDuration = selected;
         remainingSeconds = selected;
@@ -392,6 +463,32 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'FOULS / WARNINGS  ${isAka ? akaFouls : aoFouls}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _scoreButton(
+                  label: '−',
+                  color: Colors.white70,
+                  onPressed: () => _changeFouls(isAka, -1),
+                ),
+                const SizedBox(width: 4),
+                _scoreButton(
+                  label: '+',
+                  color: color,
+                  onPressed: () => _changeFouls(isAka, 1),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -427,7 +524,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           const Text(
-            'KARATE ELITE',
+            'Z-SCORE',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: goldColor,
@@ -461,12 +558,17 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
             ),
           ),
           if (matchFinished)
-            Text(
-              'WINNER: $_winner',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: goldColor,
-                fontWeight: FontWeight.bold,
+            FadeTransition(
+              opacity: _winnerOpacity,
+              child: Text(
+                'WINNER: $_winner',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: goldColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
@@ -474,6 +576,26 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
               'KUMITE • MATCH',
               style: TextStyle(color: Colors.white54, fontSize: 11),
             ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                tooltip: 'Subtract one second',
+                onPressed: () => _adjustTime(-1),
+                icon: const Icon(Icons.remove_circle_outline),
+                color: Colors.white70,
+                visualDensity: VisualDensity.compact,
+              ),
+              const Text('1 SEC', style: TextStyle(fontSize: 10, color: Colors.white54)),
+              IconButton(
+                tooltip: 'Add one second',
+                onPressed: () => _adjustTime(1),
+                icon: const Icon(Icons.add_circle_outline),
+                color: goldColor,
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
           FilledButton.icon(
             onPressed: isRunning ? _pauseTimer : _startTimer,
             icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
@@ -502,7 +624,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> {
                   const Icon(Icons.sports_martial_arts, color: goldColor),
                   const SizedBox(width: 8),
                   const Text(
-                    'ELITE SCOREBOARD',
+                    'Z-SCORE SCOREBOARD',
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5,
@@ -605,6 +727,8 @@ class _ScoreSnapshot {
   const _ScoreSnapshot({
     required this.akaScore,
     required this.aoScore,
+    required this.akaFouls,
+    required this.aoFouls,
     required this.remainingSeconds,
     required this.isRunning,
     required this.matchFinished,
@@ -612,6 +736,8 @@ class _ScoreSnapshot {
 
   final int akaScore;
   final int aoScore;
+  final int akaFouls;
+  final int aoFouls;
   final int remainingSeconds;
   final bool isRunning;
   final bool matchFinished;
