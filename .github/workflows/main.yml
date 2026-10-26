@@ -35,6 +35,9 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms=android --project-name=karate_scoreboard .
 
+      - name: Set Android launcher name
+        run: sed -i 's/android:label="karate_scoreboard"/android:label="Z-Score"/' android/app/src/main/AndroidManifest.xml
+
       - name: Install dependencies
         run: flutter pub get
 
