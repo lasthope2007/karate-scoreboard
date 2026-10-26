@@ -108,7 +108,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   void _logEvent(String description) {
-    final elapsed = matchDuration - remainingSeconds;
+    // Clamp elapsed time so adding time never creates a negative timestamp.
+    final elapsed = (matchDuration - remainingSeconds).clamp(0, 599);
     final stamp = '${(elapsed ~/ 60).toString().padLeft(2, '0')}:${(elapsed % 60).toString().padLeft(2, '0')}';
     matchHistory.insert(0, _MatchEvent(time: stamp, description: description, akaScore: akaScore, aoScore: aoScore, remainingSeconds: remainingSeconds));
     if (matchHistory.length > 250) matchHistory.removeLast();
@@ -175,7 +176,9 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _startTimer() {
     if (isRunning || matchFinished || remainingSeconds <= 0) return;
 
+    _saveHistory();
     setState(() => isRunning = true);
+    _logEvent('TIMER STARTED');
 
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -186,12 +189,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
 
       if (remainingSeconds <= 1) {
         t.cancel();
+        _saveHistory();
         _playEndSound();
         setState(() {
           remainingSeconds = 0;
           isRunning = false;
           matchFinished = true;
         });
+        _logEvent('TIME EXPIRED — MATCH ENDED');
         _startWinnerBlink();
         return;
       }
@@ -202,8 +207,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   void _pauseTimer() {
+    if (!isRunning) return;
+    _saveHistory();
     timer?.cancel();
     setState(() => isRunning = false);
+    _logEvent('TIMER PAUSED');
   }
 
   void _resetMatch() {
@@ -226,13 +234,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       _blinkController.stop();
       _blinkController.reset();
     });
+    _logEvent('MATCH RESET');
   }
 
   void _changeScore(bool isAka, int points) {
     if (matchFinished) return;
 
     _saveHistory();
-    _logEvent('${isAka ? akaName : aoName}: ${points > 0 ? '+' : ''}$points point(s)');
+    final oldScore = isAka ? akaScore : aoScore;
 
     setState(() {
       if (isAka) {
@@ -246,6 +255,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
     });
 
+    final newScore = isAka ? akaScore : aoScore;
+    _logEvent('${isAka ? akaName : aoName}: ${points > 0 ? '+' : ''}$points point(s) — $oldScore → $newScore');
     if ((akaScore - aoScore).abs() >= maxScore) {
       _finishMatch();
     }
@@ -254,7 +265,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _changeFouls(bool isAka, int delta) {
     if (matchFinished) return;
     _saveHistory();
-    _logEvent('${isAka ? akaName : aoName}: warning counter ${delta > 0 ? '+' : ''}$delta');
     setState(() {
       if (isAka) {
         akaFouls = (akaFouls + delta).clamp(0, 99);
@@ -262,24 +272,25 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         aoFouls = (aoFouls + delta).clamp(0, 99);
       }
     });
+    _logEvent('${isAka ? akaName : aoName}: warning counter ${delta > 0 ? '+' : ''}$delta — now ${isAka ? akaFouls : aoFouls}');
   }
 
   void _toggleSenshu(bool isAka) {
     if (matchFinished) return;
     _saveHistory();
     final awarding = isAka ? !akaSenshu : !aoSenshu;
-    _logEvent('${isAka ? akaName : aoName}: SENSHU ${awarding ? 'awarded' : 'removed'}');
     setState(() {
       if (isAka) { akaSenshu = !akaSenshu; if (akaSenshu) aoSenshu = false; }
       else { aoSenshu = !aoSenshu; if (aoSenshu) akaSenshu = false; }
     });
+    _logEvent('${isAka ? akaName : aoName}: SENSHU ${awarding ? 'awarded' : 'removed'}');
   }
 
   void _togglePenalty(bool isAka, String penalty) {
     if (matchFinished) return;
     _saveHistory();
     final existing = isAka ? akaPenalties : aoPenalties;
-    _logEvent('${isAka ? akaName : aoName}: $penalty ${existing.contains(penalty) ? 'removed' : 'recorded'}');
+    final wasActive = existing.contains(penalty);
     setState(() {
       final p = isAka ? akaPenalties : aoPenalties;
       if (p.contains(penalty)) { p.remove(penalty); }
@@ -288,18 +299,22 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         if (penalty == 'HANSOKU') { isRunning = false; timer?.cancel(); matchFinished = true; }
       }
     });
-    if (penalty == 'HANSOKU' && (isAka ? akaPenalties.contains(penalty) : aoPenalties.contains(penalty))) {
-      _playEndSound(); _startWinnerBlink();
+    _logEvent('${isAka ? akaName : aoName}: $penalty ${wasActive ? 'removed' : 'recorded'}');
+    if (penalty == 'HANSOKU' && !wasActive && (isAka ? akaPenalties.contains(penalty) : aoPenalties.contains(penalty))) {
+      _logEvent('MATCH ENDED — HANSOKU against ${isAka ? akaName : aoName}');
+      _playEndSound();
+      _startWinnerBlink();
     }
   }
 
   void _adjustTime(int delta) {
     if (matchFinished) return;
     _saveHistory();
-    _logEvent('Timer ${delta > 0 ? 'increased' : 'decreased'} by ${delta.abs()} second');
+    final previousTime = remainingSeconds;
     setState(() {
       remainingSeconds = (remainingSeconds + delta).clamp(0, 599);
     });
+    _logEvent('TIMER ${delta > 0 ? 'increased' : 'decreased'} by ${delta.abs()} sec — $previousTime → $remainingSeconds');
     if (remainingSeconds == 0) _finishMatch();
   }
 
@@ -351,6 +366,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       isRunning = false;
       matchFinished = previous.matchFinished;
     });
+    _logEvent('UNDO — restored score ${akaScore}–${aoScore}, timer ${_formatTime(remainingSeconds)}');
     if (matchFinished) {
       _startWinnerBlink();
     } else {
@@ -360,12 +376,15 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   void _finishMatch() {
+    if (matchFinished) return;
+    _saveHistory();
     timer?.cancel();
 
     setState(() {
       isRunning = false;
       matchFinished = true;
     });
+    _logEvent('MATCH ENDED — winner: $_winner');
     _playEndSound();
     _startWinnerBlink();
   }
@@ -536,8 +555,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           border: Border.all(color: color, width: isWinner ? 5 : 2),
           boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.65), blurRadius: 28, spreadRadius: 4)] : const [],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Text(
               name.toUpperCase(),
@@ -626,6 +648,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
               ),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -637,8 +660,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       style: OutlinedButton.styleFrom(
         foregroundColor: active ? Colors.black : color,
         backgroundColor: active ? color : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        minimumSize: const Size(0, 34),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        minimumSize: const Size(0, 32),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         side: BorderSide(color: active ? color : color.withValues(alpha: 0.65), width: active ? 2 : 1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
@@ -749,9 +772,9 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
             ],
           ),
           FilledButton.icon(
-            onPressed: isRunning ? _pauseTimer : _startTimer,
-            icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
-            label: Text(isRunning ? 'PAUSE' : 'START'),
+            onPressed: matchFinished ? null : (isRunning ? _pauseTimer : _startTimer),
+            icon: Icon(matchFinished ? Icons.flag : (isRunning ? Icons.pause : Icons.play_arrow)),
+            label: Text(matchFinished ? 'FINISHED' : (isRunning ? 'PAUSE' : 'START')),
           ),
           OutlinedButton.icon(
             onPressed: _undo,
