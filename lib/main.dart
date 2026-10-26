@@ -546,91 +546,101 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     final senshu = isAka ? akaSenshu : aoSenshu;
     final ippon = isAka ? akaIppon : aoIppon;
     final wazaAri = isAka ? akaWazaAri : aoWazaAri;
+
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isWinner ? color.withValues(alpha: 0.32) : panelColor,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: color, width: isWinner ? 5 : 2),
-          boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.65), blurRadius: 28, spreadRadius: 4)] : const [],
+          boxShadow: isWinner
+              ? [BoxShadow(color: color.withValues(alpha: 0.65), blurRadius: 28, spreadRadius: 4)]
+              : const [],
         ),
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            Text(
-              name.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
-            ),
-            if (isWinner)
-              FadeTransition(opacity: _winnerOpacity, child: Text('WINNER', style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 3))),
-            if (isWinner)
-              FadeTransition(opacity: _winnerOpacity, child: Text('$score', style: TextStyle(color: color, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: const [FontFeature.tabularFigures()])))
-            else
-              Text('$score', style: const TextStyle(color: Colors.white, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: [FontFeature.tabularFigures()])),
+            // Keep Senshu visible in the header, so the referee never needs to scroll.
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _scoreButton(
-                  label: '+1',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 1),
+                Expanded(
+                  child: Text(
+                    name.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 3,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '+2',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 2),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '+3',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 3),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '−1',
-                  color: Colors.white70,
-                  onPressed: () => _changeScore(isAka, -1),
+                Tooltip(
+                  message: senshu ? 'Remove Senshu' : 'Award Senshu',
+                  child: Material(
+                    color: senshu ? color : color.withValues(alpha: 0.12),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => _toggleSenshu(isAka),
+                      child: SizedBox(
+                        width: 42,
+                        height: 42,
+                        child: Icon(
+                          senshu ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: senshu ? Colors.black : color,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 5),
-            Text('IPPON  $ippon     •     WAZA-ARI  $wazaAri', style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 5),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _toggleSenshu(isAka),
-                icon: Icon(senshu ? Icons.check_circle : Icons.radio_button_unchecked, size: 20),
-                label: Text(senshu ? 'SENSHU AWARDED' : 'AWARD SENSHU', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2, fontSize: 12)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: senshu ? Colors.black : color,
-                  backgroundColor: senshu ? color : color.withValues(alpha: 0.08),
-                  side: BorderSide(color: color, width: senshu ? 2.5 : 1.5),
-                  minimumSize: const Size(0, 42),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                  shape: const StadiumBorder(),
+            if (isWinner)
+              FadeTransition(
+                opacity: _winnerOpacity,
+                child: Text('WINNER', style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 3)),
+              ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '$score',
+                style: TextStyle(
+                  color: isWinner ? color : Colors.white,
+                  fontSize: 68,
+                  height: 0.95,
+                  fontWeight: FontWeight.w900,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _scoreButton(label: '+1', color: color, onPressed: () => _changeScore(isAka, 1)),
+                const SizedBox(width: 5),
+                _scoreButton(label: '+2', color: color, onPressed: () => _changeScore(isAka, 2)),
+                const SizedBox(width: 5),
+                _scoreButton(label: '+3', color: color, onPressed: () => _changeScore(isAka, 3)),
+                const SizedBox(width: 5),
+                _scoreButton(label: '−1', color: Colors.white70, onPressed: () => _changeScore(isAka, -1)),
+              ],
+            ),
+            Text(
+              'IPPON  $ippon     •     WAZA-ARI  $wazaAri',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
             Wrap(
               alignment: WrapAlignment.center,
-              spacing: 6,
-              runSpacing: 5,
+              spacing: 5,
+              runSpacing: 4,
               children: [
                 _smallToggle('CHUI 1', penalties.contains('CHUI 1'), color, () => _togglePenalty(isAka, 'CHUI 1')),
                 _smallToggle('CHUI 2', penalties.contains('CHUI 2'), color, () => _togglePenalty(isAka, 'CHUI 2')),
@@ -639,17 +649,18 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                 _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU')),
               ],
             ),
-            const SizedBox(height: 5),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Text(
                 'WARNINGS  ${isAka ? akaFouls : aoFouls}',
-                style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
           ],
-          ),
         ),
       ),
     );
@@ -680,8 +691,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       style: FilledButton.styleFrom(
         backgroundColor: color.withValues(alpha: 0.16),
         foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-        minimumSize: const Size(52, 46),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        minimumSize: const Size(46, 40),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
