@@ -258,6 +258,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     final newScore = isAka ? akaScore : aoScore;
     _logEvent('${isAka ? akaName : aoName}: ${points > 0 ? '+' : ''}$points point(s) — $oldScore → $newScore');
     if ((akaScore - aoScore).abs() >= maxScore) {
+      _saveHistory();
       _finishMatch();
     }
   }
@@ -377,7 +378,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
 
   void _finishMatch() {
     if (matchFinished) return;
-    _saveHistory();
     timer?.cancel();
 
     setState(() {
@@ -529,7 +529,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       },
     );
 
-    if (confirm == true && mounted) {
+    if (confirm == true && mounted && !matchFinished) {
+      _saveHistory();
       _finishMatch();
     }
   }
