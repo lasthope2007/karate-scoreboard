@@ -6,10 +6,10 @@ A lightweight, offline-first, landscape scoreboard for karate kumite. Built with
 - Landscape-first immersive Android interface
 - Manual start/pause/resume clock with configurable 1:00, 1:30, 2:00, 3:00 or 4:00 rounds
 - One-tap +1 / +2 / +3 scoring for either competitor
-- Simple penalty control (+1 to the opponent)
+- Five separate penalty controls per competitor: CHUI 1, CHUI 2, CHUI 3, HANSOKU-CHUI and HANSOKU
 - Automatic match end at an 8-point lead or when the clock reaches zero
-- Undo recent scoring/clock actions
-- Athlete names and local match history (saved on the device)
+- Undo recent scoring, penalty and clock actions
+- In-match event history showing the match clock, score and action details
 - Reset clock, reset match, end match, and match-complete dialog
 - GitHub Actions workflow builds a release APK and stores it as an artifact
 
