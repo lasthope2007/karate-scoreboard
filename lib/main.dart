@@ -621,7 +621,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
               child: Text(
-                'WARNINGS  \${isAka ? akaFouls : aoFouls}',
+                'WARNINGS  ${isAka ? akaFouls : aoFouls}',
                 style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
               ),
             ),
