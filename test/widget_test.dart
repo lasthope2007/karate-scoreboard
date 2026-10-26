@@ -24,7 +24,7 @@ void main() {
     expect(find.text('+2'), findsNWidgets(2));
     expect(find.text('+3'), findsNWidgets(2));
     expect(find.textContaining('WARNINGS'), findsNWidgets(2));
-    expect(find.textContaining('SENSHU'), findsNWidgets(2));
+    expect(find.byTooltip('Award Senshu'), findsNWidgets(2));
     expect(find.text('CHUI 1'), findsNWidgets(2));
     expect(find.text('CHUI 2'), findsNWidgets(2));
     expect(find.text('CHUI 3'), findsNWidgets(2));
