@@ -72,6 +72,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   late final Animation<double> _winnerOpacity;
 
   final List<_ScoreSnapshot> history = [];
+  final List<_MatchEvent> matchHistory = [];
 
   @override
   void initState() {
@@ -104,6 +105,48 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
+  }
+
+  void _logEvent(String description) {
+    final elapsed = matchDuration - remainingSeconds;
+    final stamp = '${(elapsed ~/ 60).toString().padLeft(2, '0')}:${(elapsed % 60).toString().padLeft(2, '0')}';
+    matchHistory.insert(0, _MatchEvent(time: stamp, description: description, akaScore: akaScore, aoScore: aoScore, remainingSeconds: remainingSeconds));
+    if (matchHistory.length > 250) matchHistory.removeLast();
+  }
+
+  Future<void> _showHistory() async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: panelColor,
+        title: Row(children: [const Expanded(child: Text('MATCH HISTORY')), Text('${matchHistory.length}', style: const TextStyle(color: goldColor))]),
+        content: SizedBox(
+          width: 520,
+          height: 360,
+          child: matchHistory.isEmpty
+              ? const Center(child: Text('No events recorded yet.', style: TextStyle(color: Colors.white54)))
+              : ListView.separated(
+                  itemCount: matchHistory.length,
+                  separatorBuilder: (_, __) => const Divider(color: Colors.white12, height: 1),
+                  itemBuilder: (_, index) {
+                    final event = matchHistory[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        SizedBox(width: 54, child: Text(event.time, style: const TextStyle(color: goldColor, fontWeight: FontWeight.bold))),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(event.description, style: const TextStyle(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 3),
+                          Text('Score ${event.akaScore} - ${event.aoScore}  •  Timer ${_formatTime(event.remainingSeconds)}', style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                        ])),
+                      ]),
+                    );
+                  },
+                ),
+        ),
+        actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('CLOSE'))],
+      ),
+    );
   }
 
   void _saveHistory() {
@@ -179,6 +222,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       isRunning = false;
       matchFinished = false;
       history.clear();
+      matchHistory.clear();
       _blinkController.stop();
       _blinkController.reset();
     });
@@ -188,6 +232,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     if (matchFinished) return;
 
     _saveHistory();
+    _logEvent('${isAka ? akaName : aoName}: ${points > 0 ? '+' : ''}$points point(s)');
 
     setState(() {
       if (isAka) {
@@ -209,6 +254,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _changeFouls(bool isAka, int delta) {
     if (matchFinished) return;
     _saveHistory();
+    _logEvent('${isAka ? akaName : aoName}: warning counter ${delta > 0 ? '+' : ''}$delta');
     setState(() {
       if (isAka) {
         akaFouls = (akaFouls + delta).clamp(0, 99);
@@ -221,6 +267,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _toggleSenshu(bool isAka) {
     if (matchFinished) return;
     _saveHistory();
+    final awarding = isAka ? !akaSenshu : !aoSenshu;
+    _logEvent('${isAka ? akaName : aoName}: SENSHU ${awarding ? 'awarded' : 'removed'}');
     setState(() {
       if (isAka) { akaSenshu = !akaSenshu; if (akaSenshu) aoSenshu = false; }
       else { aoSenshu = !aoSenshu; if (aoSenshu) akaSenshu = false; }
@@ -230,6 +278,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _togglePenalty(bool isAka, String penalty) {
     if (matchFinished) return;
     _saveHistory();
+    final existing = isAka ? akaPenalties : aoPenalties;
+    _logEvent('${isAka ? akaName : aoName}: $penalty ${existing.contains(penalty) ? 'removed' : 'recorded'}');
     setState(() {
       final p = isAka ? akaPenalties : aoPenalties;
       if (p.contains(penalty)) { p.remove(penalty); }
@@ -246,6 +296,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   void _adjustTime(int delta) {
     if (matchFinished) return;
     _saveHistory();
+    _logEvent('Timer ${delta > 0 ? 'increased' : 'decreased'} by ${delta.abs()} second');
     setState(() {
       remainingSeconds = (remainingSeconds + delta).clamp(0, 599);
     });
@@ -430,6 +481,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         isRunning = false;
         matchFinished = false;
         history.clear();
+        matchHistory.clear();
       });
     }
   }
@@ -737,6 +789,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
+                    tooltip: 'Match history',
+                    onPressed: _showHistory,
+                    icon: const Icon(Icons.history),
+                  ),
+                  IconButton(
                     tooltip: 'Match duration',
                     onPressed: _chooseDuration,
                     icon: const Icon(Icons.timer_outlined),
@@ -816,6 +873,15 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       ),
     );
   }
+}
+
+class _MatchEvent {
+  const _MatchEvent({required this.time, required this.description, required this.akaScore, required this.aoScore, required this.remainingSeconds});
+  final String time;
+  final String description;
+  final int akaScore;
+  final int aoScore;
+  final int remainingSeconds;
 }
 
 class _ScoreSnapshot {
