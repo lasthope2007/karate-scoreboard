@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +67,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   bool isFullscreen = false;
 
   Timer? timer;
+  final AudioPlayer _audioPlayer = AudioPlayer();
   late final AnimationController _blinkController;
   late final Animation<double> _winnerOpacity;
 
@@ -97,6 +99,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   @override
   void dispose() {
     timer?.cancel();
+    _audioPlayer.dispose();
     _blinkController.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
@@ -140,6 +143,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
 
       if (remainingSeconds <= 1) {
         t.cancel();
+        _playEndSound();
         setState(() {
           remainingSeconds = 0;
           isRunning = false;
@@ -150,8 +154,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
 
       setState(() => remainingSeconds--);
-      if (remainingSeconds <= 15 && remainingSeconds > 0) _playAlert();
-      if (remainingSeconds == 0) _playAlert();
+      if (remainingSeconds <= 15 && remainingSeconds > 0) _playCountdownSound();
     });
   }
 
@@ -236,7 +239,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       }
     });
     if (penalty == 'HANSOKU' && (isAka ? akaPenalties.contains(penalty) : aoPenalties.contains(penalty))) {
-      _playAlert(); _startWinnerBlink();
+      _playEndSound(); _startWinnerBlink();
     }
   }
 
@@ -249,16 +252,26 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     if (remainingSeconds == 0) _finishMatch();
   }
 
-  Future<void> _playAlert() async {
+  Future<void> _playCountdownSound() async {
     try {
-      await SystemSound.play(SystemSoundType.alert);
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource('countdown.wav'));
     } catch (_) {
-      // Some Android devices or system profiles may silence system alerts.
+      // Audio is best-effort if a device disables media output.
+    }
+  }
+
+  Future<void> _playEndSound() async {
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource('match_end.wav'));
+    } catch (_) {
+      // Audio is best-effort if a device disables media output.
     }
   }
 
   void _startWinnerBlink() {
-    if (akaScore == aoScore) {
+    if (_winner == 'HANTEI REQUIRED') {
       _blinkController.stop();
       _blinkController.reset();
       return;
@@ -302,7 +315,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       isRunning = false;
       matchFinished = true;
     });
-    _playAlert();
+    _playEndSound();
     _startWinnerBlink();
   }
 
