@@ -37,27 +37,51 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms=android --project-name=karate_scoreboard .
 
-      - name: Generate app icon and audio assets
+      - name: Generate app icon and referee sounds
         run: |
           sudo apt-get update
-          sudo apt-get install -y librsvg2-bin
+          sudo apt-get install -y imagemagick
           mkdir -p assets
-          rsvg-convert -w 1024 -h 1024 assets/z_score_icon.svg -o assets/z_score_icon.png
+          # The supplied Z-Score artwork is stored losslessly as a compact base64 JPEG.
+          base64 -d assets/z_score_icon.jpg.b64 > assets/z_score_icon.jpg
+          convert assets/z_score_icon.jpg -resize 1024x1024 assets/z_score_icon.png
           python3 - <<'PY'
           import math, struct, wave
-          def write_tone(path, notes, duration=0.12, rate=44100):
+          RATE = 44100
+
+          def write_samples(path, samples):
               with wave.open(path, 'wb') as out:
-                  out.setnchannels(1); out.setsampwidth(2); out.setframerate(rate)
-                  frames = bytearray()
-                  for freq in notes:
-                      count = int(rate * duration)
-                      for i in range(count):
-                          envelope = min(1.0, i / 500, (count - i) / 500)
-                          sample = int(10000 * envelope * math.sin(2 * math.pi * freq * i / rate))
-                          frames.extend(struct.pack('<h', sample))
-                  out.writeframes(frames)
-          write_tone('assets/countdown.wav', [880], 0.10)
-          write_tone('assets/match_end.wav', [660, 880, 1100], 0.20)
+                  out.setnchannels(1)
+                  out.setsampwidth(2)
+                  out.setframerate(RATE)
+                  out.writeframes(b''.join(struct.pack('<h', max(-32768, min(32767, int(v)))) for v in samples))
+
+          # A clear, whistle-like rising/falling tone when the clock reaches 15 seconds.
+          whistle_duration = 0.85
+          whistle_count = int(RATE * whistle_duration)
+          whistle = []
+          phase = 0.0
+          for i in range(whistle_count):
+              t = i / RATE
+              progress = i / max(1, whistle_count - 1)
+              freq = 1750 + 650 * math.sin(math.pi * progress)
+              phase += 2 * math.pi * freq / RATE
+              envelope = min(1.0, i / (RATE * 0.035), (whistle_count - i) / (RATE * 0.08))
+              sample = 19000 * envelope * (math.sin(phase) + 0.18 * math.sin(2 * phase))
+              whistle.append(sample)
+          write_samples('assets/countdown.wav', whistle)
+
+          # Long, attention-grabbing end-of-match buzzer with a short fade at both ends.
+          buzzer_duration = 1.65
+          buzzer_count = int(RATE * buzzer_duration)
+          buzzer = []
+          for i in range(buzzer_count):
+              t = i / RATE
+              envelope = min(1.0, i / (RATE * 0.025), (buzzer_count - i) / (RATE * 0.10))
+              pulse = 0.82 + 0.18 * math.sin(2 * math.pi * 7 * t)
+              tone = math.sin(2 * math.pi * 980 * t) + 0.22 * math.sin(2 * math.pi * 1960 * t)
+              buzzer.append(22000 * envelope * pulse * tone / 1.22)
+          write_samples('assets/match_end.wav', buzzer)
           PY
 
       - name: Set Android launcher name
