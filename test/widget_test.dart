@@ -23,7 +23,11 @@ void main() {
     expect(find.text('+1'), findsNWidgets(2));
     expect(find.text('+2'), findsNWidgets(2));
     expect(find.text('+3'), findsNWidgets(2));
-    expect(find.textContaining('WARNINGS'), findsNWidgets(2));
+    expect(find.textContaining('WARNINGS'), findsNothing);
+    expect(find.text('MATCH TIMER'), findsOneWidget);
+    expect(find.text('POINTS'), findsNWidgets(2));
+    expect(find.text('FOULS'), findsNWidgets(2));
+    expect(find.byTooltip('Settings'), findsOneWidget);
     expect(find.byTooltip('Award Senshu'), findsNWidgets(2));
     expect(find.byTooltip('Switch sides'), findsOneWidget);
     expect(find.text('CHUI 1'), findsNWidgets(2));
