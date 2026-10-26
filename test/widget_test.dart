@@ -23,6 +23,8 @@ void main() {
     expect(find.text('+1'), findsNWidgets(2));
     expect(find.text('+2'), findsNWidgets(2));
     expect(find.text('+3'), findsNWidgets(2));
-    expect(find.textContaining('FOULS / WARNINGS'), findsNWidgets(2));
+    expect(find.textContaining('WARNINGS'), findsNWidgets(2));
+    expect(find.text('SENSHU'), findsNWidgets(2));
+    expect(find.text('HANSOKU-CHUI'), findsNWidgets(2));
   });
 }
