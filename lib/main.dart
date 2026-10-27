@@ -676,12 +676,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
         )),
         SizedBox(width: double.infinity, height: 46, child: OutlinedButton.icon(
-          onPressed: isRunning ? _pauseTimer : null, icon: const Icon(Icons.pause_rounded, size: 18),
-          label: const Text('PAUSE', style: TextStyle(fontWeight: FontWeight.w800)),
-          style: OutlinedButton.styleFrom(foregroundColor: Colors.white70, side: const BorderSide(color: Colors.white24),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
-        )),
-        SizedBox(width: double.infinity, height: 46, child: OutlinedButton.icon(
           onPressed: history.isEmpty ? null : _undo, icon: const Icon(Icons.undo_rounded, size: 18),
           label: const Text('UNDO', style: TextStyle(fontWeight: FontWeight.w800)),
           style: OutlinedButton.styleFrom(foregroundColor: goldColor, side: BorderSide(color: goldColor.withValues(alpha: 0.65)),
