@@ -1,8 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#080d18"/><stop offset=".55" stop-color="#03050a"/><stop offset="1" stop-color="#10040b"/></linearGradient><linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c8ff"/><stop offset=".48" stop-color="#142cff"/><stop offset="1" stop-color="#ff1744"/></linearGradient><linearGradient id="zfill" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#dce5f8"/><stop offset="1" stop-color="#a8b4d2"/></linearGradient><linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#25d9ff"/><stop offset="1" stop-color="#0752f4"/></linearGradient><linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff2525"/><stop offset="1" stop-color="#d90026"/></linearGradient><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="13"/></filter></defs>
-<rect x="115" y="105" width="794" height="814" rx="155" fill="url(#bg)" stroke="url(#edge)" stroke-width="5"/><rect x="125" y="115" width="774" height="794" rx="145" fill="none" stroke="#24304d" stroke-width="2"/>
-<path d="M232 467 A280 280 0 0 1 640 194" fill="none" stroke="#078cff" stroke-width="10" opacity=".9"/><path d="M779 332 A280 280 0 0 1 696 711" fill="none" stroke="#fa173a" stroke-width="10" opacity=".85"/>
-<path d="M228 620 420 405 705 250 762 260 515 492 341 647 666 647 709 620 660 695 251 695Z" fill="#008fff" opacity=".6" filter="url(#glow)"/>
-<path d="M232 630 425 402 705 250 758 260 518 492 422 580 693 580 650 635 235 635Z" fill="url(#zfill)" stroke="#f8fbff" stroke-width="3" stroke-linejoin="round"/><path d="M232 630 425 402 705 250 758 260 518 492 422 580 693 580 650 635 235 635Z" fill="none" stroke="url(#edge)" stroke-width="5" stroke-linejoin="round" opacity=".95"/>
-<g fill="url(#blue)"><rect x="228" y="480" width="24" height="72" rx="10"/><rect x="270" y="438" width="24" height="114" rx="10"/><rect x="312" y="394" width="24" height="158" rx="10"/></g><g fill="url(#red)"><rect x="690" y="508" width="24" height="44" rx="10"/><rect x="732" y="470" width="24" height="82" rx="10"/><rect x="774" y="430" width="24" height="122" rx="10"/></g>
-<text x="512" y="795" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="22" fill="#f5f7ff">SCORE</text></svg>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#07101f"/><stop offset=".58" stop-color="#03050a"/><stop offset="1" stop-color="#12050d"/></linearGradient>
+ <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#16caff"/><stop offset=".52" stop-color="#194dff"/><stop offset="1" stop-color="#ff244e"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".5" stop-color="#e7edff"/><stop offset="1" stop-color="#aab9dc"/></linearGradient>
+ <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#27dcff"/><stop offset="1" stop-color="#0758ff"/></linearGradient>
+ <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff343f"/><stop offset="1" stop-color="#d9002f"/></linearGradient>
+ <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1024" height="1024" rx="0" fill="#03050a"/>
+<rect x="118" y="108" width="788" height="808" rx="154" fill="url(#bg)" stroke="url(#rim)" stroke-width="5"/>
+<rect x="129" y="119" width="766" height="786" rx="143" fill="none" stroke="#263149" stroke-width="2"/>
+<path d="M246 472 A278 278 0 0 1 636 202" fill="none" stroke="#0797ff" stroke-width="10" opacity=".95"/>
+<path d="M777 342 A278 278 0 0 1 697 713" fill="none" stroke="#ff2348" stroke-width="10" opacity=".9"/>
+<g fill="url(#blue)"><rect x="226" y="488" width="25" height="68" rx="10"/><rect x="268" y="445" width="25" height="111" rx="10"/><rect x="310" y="400" width="25" height="156" rx="10"/></g>
+<g fill="url(#red)"><rect x="690" y="510" width="25" height="46" rx="10"/><rect x="732" y="470" width="25" height="86" rx="10"/><rect x="774" y="426" width="25" height="130" rx="10"/></g>
+<path d="M282 640 L440 382 L715 252 L760 260 L525 493 L425 576 L694 576 L652 628 L282 628 Z" fill="#078cff" opacity=".8" filter="url(#glow)"/>
+<path d="M282 630 L420 405 L700 260 L758 260 L516 492 L422 578 L693 578 L650 630 Z" fill="url(#metal)" stroke="#f8fbff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M282 630 L420 405 L700 260 L758 260 L516 492 L422 578 L693 578 L650 630 Z" fill="none" stroke="url(#rim)" stroke-width="4" stroke-linejoin="round"/>
+<text x="512" y="795" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="19" fill="#f5f7ff">SCORE</text>
+</svg>
