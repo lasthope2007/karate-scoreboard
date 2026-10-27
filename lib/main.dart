@@ -531,7 +531,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         shape: const CircleBorder(), clipBehavior: Clip.antiAlias,
         child: InkWell(
           customBorder: const CircleBorder(), onTap: () => _toggleSenshu(isAka),
-          child: SizedBox(width: 40, height: 40, child: Column(
+          child: SizedBox(width: 40, height: 38, child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(senshu ? Icons.flag_rounded : Icons.outlined_flag_rounded,
