@@ -13,6 +13,9 @@ void main() {
 
     await tester.pumpWidget(const KarateScoreboardApp());
     await tester.pump();
+    // Let the 2.5-second branded splash finish before asserting scoreboard controls.
+    await tester.pump(const Duration(milliseconds: 2600));
+    await tester.pumpAndSettle();
 
     expect(find.text('Z-SCORE SCOREBOARD'), findsOneWidget);
     expect(find.text('AKA'), findsOneWidget);
