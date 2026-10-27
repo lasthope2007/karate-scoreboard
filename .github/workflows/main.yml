@@ -35,6 +35,19 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms=android --project-name=karate_scoreboard .
 
+      # Pin a stable NDK instead of Flutter's newest default; this avoids flaky
+      # downloads of the newest NDK archive on hosted runners.
+      - name: Install stable Android NDK
+        run: |
+          sed -i 's/ndkVersion = flutter.ndkVersion/ndkVersion = "27.0.12077973"/' android/app/build.gradle.kts
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+          for attempt in 1 2 3; do
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.0.12077973" && break
+            rm -rf "$ANDROID_HOME/ndk/27.0.12077973"
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep 5
+          done
+
       - name: Generate app icon
         run: |
           sudo apt-get update
