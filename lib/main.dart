@@ -33,7 +33,181 @@ class KarateScoreboardApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const ScoreboardPage(),
+      home: const ZScoreSplashScreen(),
+    );
+  }
+}
+
+class ZScoreSplashScreen extends StatefulWidget {
+  const ZScoreSplashScreen({super.key});
+
+  @override
+  State<ZScoreSplashScreen> createState() => _ZScoreSplashScreenState();
+}
+
+class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+    _opacity = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.72, curve: Curves.easeOut),
+    );
+    _scale = Tween<double>(begin: 0.78, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+    _controller.forward();
+    _openScoreboard();
+  }
+
+  Future<void> _openScoreboard() async {
+    await Future<void>.delayed(const Duration(milliseconds: 2500));
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, animation, __) => const ScoreboardPage(),
+        transitionDuration: const Duration(milliseconds: 250),
+        transitionsBuilder: (_, animation, __, child) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF03050A),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment(0, -0.15),
+                radius: 0.9,
+                colors: [Color(0xFF101B31), Color(0xFF03050A)],
+              ),
+            ),
+          ),
+          Positioned(
+            left: -70,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFF078CFF).withValues(alpha: 0.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF078CFF).withValues(alpha: 0.8),
+                    blurRadius: 35,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: -70,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF1744).withValues(alpha: 0.8),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF1744).withValues(alpha: 0.8),
+                    blurRadius: 35,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Center(
+            child: FadeTransition(
+              opacity: _opacity,
+              child: ScaleTransition(
+                scale: _scale,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 220,
+                      height: 220,
+                      child: Image.asset(
+                        'assets/z_score_icon.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(42),
+                            border: Border.all(
+                              color: const Color(0xFF2589FF),
+                              width: 2,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'Z',
+                            style: TextStyle(
+                              fontSize: 150,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Z-SCORE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 27,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 8,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 118,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: const LinearProgressIndicator(
+                          minHeight: 3,
+                          backgroundColor: Color(0xFF202838),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF2589FF),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
