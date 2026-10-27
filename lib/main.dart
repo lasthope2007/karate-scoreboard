@@ -531,7 +531,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         shape: const CircleBorder(), clipBehavior: Clip.antiAlias,
         child: InkWell(
           customBorder: const CircleBorder(), onTap: () => _toggleSenshu(isAka),
-          child: SizedBox(width: 46, height: 46, child: Column(
+          child: SizedBox(width: 40, height: 40, child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(senshu ? Icons.flag_rounded : Icons.outlined_flag_rounded,
@@ -553,15 +553,15 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       Expanded(child: Divider(color: color.withValues(alpha: 0.45))),
     ]);
     return Expanded(child: Container(
-      margin: const EdgeInsets.all(7),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: isWinner ? color.withValues(alpha: 0.20) : panelColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color, width: isWinner ? 3.5 : 2),
         boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.55), blurRadius: 24, spreadRadius: 2)] : const [],
       ),
-      child: SingleChildScrollView(physics: const ClampingScrollPhysics(), child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Row(children: [
           senshuButton,
           const SizedBox(width: 6),
@@ -576,7 +576,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         FittedBox(fit: BoxFit.scaleDown, child: FadeTransition(
           opacity: isWinner ? _winnerOpacity : const AlwaysStoppedAnimation<double>(1),
           child: Text('$score', style: TextStyle(color: isWinner ? color : Colors.white,
-            fontSize: 72, height: 0.92, fontWeight: FontWeight.w900,
+            fontSize: 60, height: 0.9, fontWeight: FontWeight.w900,
             fontFeatures: const [FontFeature.tabularFigures()])))),
         Row(children: [
           Expanded(child: Text('IPPON  $ippon', textAlign: TextAlign.center,
@@ -607,18 +607,18 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           const SizedBox(width: 7),
           Expanded(child: _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU'))),
         ]),
-      ])),
+      ]),
     ));
   }
 
   Widget _smallToggle(String label, bool active, Color color, VoidCallback onTap) {
-    return SizedBox(height: 32, child: OutlinedButton(
+    return SizedBox(height: 28, child: OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         foregroundColor: active ? Colors.black : color,
         backgroundColor: active ? color : color.withValues(alpha: 0.035),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
-        minimumSize: const Size(0, 32), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: const Size(0, 28), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         side: BorderSide(color: active ? color : color.withValues(alpha: 0.75), width: active ? 2 : 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -628,11 +628,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   Widget _scoreButton({required String label, required Color color, required VoidCallback onPressed}) {
-    return SizedBox(width: double.infinity, height: 44, child: FilledButton(
+    return SizedBox(width: double.infinity, height: 38, child: FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: color.withValues(alpha: 0.12), foregroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-        minimumSize: const Size(0, 42), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: const Size(0, 36), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         side: BorderSide(color: color.withValues(alpha: 0.75), width: 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
       ),
