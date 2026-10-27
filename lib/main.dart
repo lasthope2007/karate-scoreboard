@@ -563,7 +563,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       ),
       child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Row(children: [
-          senshuButton, const SizedBox(width: 8),
+          if (!isAka) senshuButton else const SizedBox(width: 58, height: 58),
+          const SizedBox(width: 8),
           Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
               style: TextStyle(color: color, fontSize: 27, fontWeight: FontWeight.w900, letterSpacing: 2.2)),
@@ -606,6 +607,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           const SizedBox(width: 7),
           Expanded(child: _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU'))),
         ]),
+        if (isAka) Center(child: senshuButton),
       ]),
     ));
   }
