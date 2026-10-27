@@ -1,1 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101827"/><stop offset=".62" stop-color="#05070c"/><stop offset="1" stop-color="#160812"/></linearGradient><linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#21c8ff"/><stop offset=".5" stop-color="#6478ff"/><stop offset="1" stop-color="#ff3154"/></linearGradient><linearGradient id="white" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#bac7df"/></linearGradient><filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="16"/></filter></defs><rect width="1024" height="1024" fill="#03050a"/><rect x="108" y="108" width="808" height="808" rx="170" fill="url(#bg)" stroke="url(#rim)" stroke-width="7"/><path d="M230 315 H710 L590 430 H360 L740 430 L300 735 H730" fill="none" stroke="#176aff" stroke-width="32" stroke-linejoin="round" opacity=".23" filter="url(#glow)"/><path d="M235 310 H710 L590 425 H360 L740 425 L300 730 H735" fill="none" stroke="#28364e" stroke-width="20" stroke-linejoin="round" opacity=".8"/><circle cx="510" cy="260" r="54" fill="url(#white)"/><path d="M462 247 Q510 212 558 247 L557 266 Q510 238 463 267Z" fill="#101827"/><path d="M478 315 L560 329 L604 449 L551 493 L449 451 L452 363Z" fill="url(#white)" stroke="#f4f7ff" stroke-width="5" stroke-linejoin="round"/><path d="M470 326 L407 370 L350 338 L325 366 L405 420 L484 390Z" fill="url(#white)" stroke="#f4f7ff" stroke-width="5" stroke-linejoin="round"/><path d="M557 340 L621 310 L668 340 L650 370 L608 356 L585 405Z" fill="url(#white)" stroke="#f4f7ff" stroke-width="5" stroke-linejoin="round"/><path d="M475 454 L531 477 L489 555 L398 589 L376 560 L444 519Z" fill="url(#white)" stroke="#f4f7ff" stroke-width="5" stroke-linejoin="round"/><path d="M548 468 L600 446 L662 492 L735 493 L741 528 L641 538 L575 512Z" fill="url(#white)" stroke="#f4f7ff" stroke-width="5" stroke-linejoin="round"/><path d="M454 430 L572 448 L566 472 L448 452Z" fill="#151c2a"/><path d="M520 441 L545 445 L529 500 L506 495Z" fill="#e52949"/><path d="M338 373 L367 350 L384 366 L359 392Z" fill="#21c8ff"/><path d="M704 493 L739 490 L743 517 L709 520Z" fill="#ff3154"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111a2b"/><stop offset=".58" stop-color="#070b13"/><stop offset="1" stop-color="#160910"/></linearGradient>
+ <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18c9ff"/><stop offset=".52" stop-color="#536dff"/><stop offset="1" stop-color="#ff294f"/></linearGradient>
+ <linearGradient id="gi" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#aab8d0"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1024" height="1024" rx="220" fill="#03050a"/>
+<rect x="70" y="70" width="884" height="884" rx="205" fill="url(#bg)" stroke="url(#rim)" stroke-width="8"/>
+<circle cx="512" cy="480" r="315" fill="none" stroke="#182338" stroke-width="5"/>
+<path d="M254 617 A300 300 0 0 1 405 222" fill="none" stroke="#11bfff" stroke-width="15" stroke-linecap="round"/>
+<path d="M680 244 A300 300 0 0 1 785 601" fill="none" stroke="#ff2e51" stroke-width="15" stroke-linecap="round"/>
+<path d="M344 713 L514 551 L712 330 L760 342 L628 500 L495 617 L718 617 L676 677 L344 713Z" fill="#078bff" opacity=".45" filter="url(#glow)"/>
+<!-- compact, readable kumite fighter silhouette -->
+<circle cx="487" cy="274" r="51" fill="url(#gi)"/>
+<path d="M445 265 Q484 227 528 260 L527 278 Q484 254 447 285Z" fill="#101827"/>
+<path d="M449 333 L534 324 L587 423 L548 485 L439 456 L419 381Z" fill="url(#gi)" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+<!-- raised guard arm -->
+<path d="M456 350 L390 333 L346 378 L317 358 L367 296 L477 308Z" fill="url(#gi)" stroke="#f5f8ff" stroke-width="5" stroke-linejoin="round"/>
+<!-- striking arm -->
+<path d="M526 347 L585 301 L638 317 L625 347 L589 342 L563 402Z" fill="url(#gi)" stroke="#f5f8ff" stroke-width="5" stroke-linejoin="round"/>
+<!-- grounded leg -->
+<path d="M453 451 L520 463 L484 559 L407 624 L378 596 L430 532Z" fill="url(#gi)" stroke="#f5f8ff" stroke-width="5" stroke-linejoin="round"/>
+<!-- high side kick -->
+<path d="M530 454 L583 420 L655 438 L724 393 L751 416 L675 475 L597 493 L551 500Z" fill="url(#gi)" stroke="#f5f8ff" stroke-width="5" stroke-linejoin="round"/>
+<!-- black belt and red knot -->
+<path d="M432 433 L553 451 L548 476 L426 457Z" fill="#111827"/>
+<path d="M500 444 L526 449 L511 498 L487 493Z" fill="#e52b4d"/>
+</svg>
