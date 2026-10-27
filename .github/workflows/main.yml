@@ -54,6 +54,7 @@ jobs:
           sudo apt-get install -y librsvg2-bin
           mkdir -p assets
           rsvg-convert -w 1024 -h 1024 assets/z_score_icon.svg -o assets/z_score_icon.png
+          rsvg-convert -w 1800 -h 760 assets/z_score_splash.svg -o assets/z_score_splash.png
 
       - name: Set Android launcher name
         run: sed -i 's/android:label="karate_scoreboard"/android:label="Z-Score"/' android/app/src/main/AndroidManifest.xml
