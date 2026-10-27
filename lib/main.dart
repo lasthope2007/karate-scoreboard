@@ -65,6 +65,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   bool isRunning = false;
   bool matchFinished = false;
   bool isFullscreen = false;
+  bool sidesSwitched = false;
 
   Timer? timer;
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -516,363 +517,243 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   Widget _scorePanel({
-    required String name,
-    required int score,
-    required Color color,
-    required bool isAka,
+    required String name, required int score, required Color color, required bool isAka,
   }) {
     final isWinner = matchFinished && ((_winner == akaName && isAka) || (_winner == aoName && !isAka));
     final penalties = isAka ? akaPenalties : aoPenalties;
     final senshu = isAka ? akaSenshu : aoSenshu;
     final ippon = isAka ? akaIppon : aoIppon;
     final wazaAri = isAka ? akaWazaAri : aoWazaAri;
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isWinner ? color.withValues(alpha: 0.32) : panelColor,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: color, width: isWinner ? 5 : 2),
-          boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.65), blurRadius: 28, spreadRadius: 4)] : const [],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text(
-              name.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 3,
-              ),
-            ),
-            if (isWinner)
-              FadeTransition(opacity: _winnerOpacity, child: Text('WINNER', style: TextStyle(color: color, fontWeight: FontWeight.w900, letterSpacing: 3))),
-            if (isWinner)
-              FadeTransition(opacity: _winnerOpacity, child: Text('$score', style: TextStyle(color: color, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: const [FontFeature.tabularFigures()])))
-            else
-              Text('$score', style: const TextStyle(color: Colors.white, fontSize: 88, height: 1, fontWeight: FontWeight.w900, fontFeatures: [FontFeature.tabularFigures()])),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _scoreButton(
-                  label: '+1',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 1),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '+2',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 2),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '+3',
-                  color: color,
-                  onPressed: () => _changeScore(isAka, 3),
-                ),
-                const SizedBox(width: 8),
-                _scoreButton(
-                  label: '−1',
-                  color: Colors.white70,
-                  onPressed: () => _changeScore(isAka, -1),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Text('IPPON  $ippon     •     WAZA-ARI  $wazaAri', style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 5),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _toggleSenshu(isAka),
-                icon: Icon(senshu ? Icons.check_circle : Icons.radio_button_unchecked, size: 20),
-                label: Text(senshu ? 'SENSHU AWARDED' : 'AWARD SENSHU', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2, fontSize: 12)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: senshu ? Colors.black : color,
-                  backgroundColor: senshu ? color : color.withValues(alpha: 0.08),
-                  side: BorderSide(color: color, width: senshu ? 2.5 : 1.5),
-                  minimumSize: const Size(0, 42),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                  shape: const StadiumBorder(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 6,
-              runSpacing: 5,
-              children: [
-                _smallToggle('CHUI 1', penalties.contains('CHUI 1'), color, () => _togglePenalty(isAka, 'CHUI 1')),
-                _smallToggle('CHUI 2', penalties.contains('CHUI 2'), color, () => _togglePenalty(isAka, 'CHUI 2')),
-                _smallToggle('CHUI 3', penalties.contains('CHUI 3'), color, () => _togglePenalty(isAka, 'CHUI 3')),
-                _smallToggle('HANSOKU-CHUI', penalties.contains('HANSOKU-CHUI'), color, () => _togglePenalty(isAka, 'HANSOKU-CHUI')),
-                _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU')),
-              ],
-            ),
-            const SizedBox(height: 5),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.04), borderRadius: BorderRadius.circular(8)),
-              child: Text(
-                'WARNINGS  ${isAka ? akaFouls : aoFouls}',
-                style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
+    final senshuButton = Tooltip(
+      message: senshu ? 'Remove Senshu' : 'Award Senshu',
+      child: Material(
+        color: senshu ? color : color.withValues(alpha: 0.12),
+        shape: const CircleBorder(), clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const CircleBorder(), onTap: () => _toggleSenshu(isAka),
+          child: SizedBox(width: 58, height: 58, child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(senshu ? Icons.flag_rounded : Icons.outlined_flag_rounded,
+                color: senshu ? Colors.black : color, size: 23),
+              const SizedBox(height: 2),
+              Text('SENSHU', style: TextStyle(
+                color: senshu ? Colors.black : color, fontSize: 8,
+                fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            ],
+          )),
         ),
       ),
     );
+    Widget sectionLabel(String label) => Row(children: [
+      Expanded(child: Divider(color: color.withValues(alpha: 0.45))),
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Text(label, style: TextStyle(color: color, fontSize: 10,
+          fontWeight: FontWeight.w900, letterSpacing: 1.4))),
+      Expanded(child: Divider(color: color.withValues(alpha: 0.45))),
+    ]);
+    return Expanded(child: Container(
+      margin: const EdgeInsets.all(7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isWinner ? color.withValues(alpha: 0.20) : panelColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color, width: isWinner ? 3.5 : 2),
+        boxShadow: isWinner ? [BoxShadow(color: color.withValues(alpha: 0.55), blurRadius: 24, spreadRadius: 2)] : const [],
+      ),
+      child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        Row(children: [
+          senshuButton, const SizedBox(width: 8),
+          Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text(name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: color, fontSize: 27, fontWeight: FontWeight.w900, letterSpacing: 2.2)),
+            if (isWinner) FadeTransition(opacity: _winnerOpacity,
+              child: Text('WINNER', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 2))),
+          ])),
+          const SizedBox(width: 66),
+        ]),
+        FittedBox(fit: BoxFit.scaleDown, child: FadeTransition(
+          opacity: isWinner ? _winnerOpacity : const AlwaysStoppedAnimation<double>(1),
+          child: Text('$score', style: TextStyle(color: isWinner ? color : Colors.white,
+            fontSize: 94, height: 0.95, fontWeight: FontWeight.w900,
+            fontFeatures: const [FontFeature.tabularFigures()])))),
+        Row(children: [
+          Expanded(child: Text('IPPON  $ippon', textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w800))),
+          const Text('•', style: TextStyle(color: Colors.white38)),
+          Expanded(child: Text('WAZA-ARI  $wazaAri', textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w800))),
+        ]),
+        sectionLabel('POINTS'),
+        Row(children: [
+          Expanded(child: _scoreButton(label: '+1', color: color, onPressed: () => _changeScore(isAka, 1))),
+          const SizedBox(width: 7),
+          Expanded(child: _scoreButton(label: '+2', color: color, onPressed: () => _changeScore(isAka, 2))),
+          const SizedBox(width: 7),
+          Expanded(child: _scoreButton(label: '+3', color: color, onPressed: () => _changeScore(isAka, 3))),
+          const SizedBox(width: 7),
+          Expanded(child: _scoreButton(label: '−1', color: const Color(0xFF8B98AA), onPressed: () => _changeScore(isAka, -1))),
+        ]),
+        sectionLabel('FOULS'),
+        Row(children: [
+          for (final penalty in ['CHUI 1', 'CHUI 2', 'CHUI 3']) ...[
+            if (penalty != 'CHUI 1') const SizedBox(width: 6),
+            Expanded(child: _smallToggle(penalty, penalties.contains(penalty), color, () => _togglePenalty(isAka, penalty))),
+          ],
+        ]),
+        Row(children: [
+          Expanded(child: _smallToggle('HANSOKU-CHUI', penalties.contains('HANSOKU-CHUI'), color, () => _togglePenalty(isAka, 'HANSOKU-CHUI'))),
+          const SizedBox(width: 7),
+          Expanded(child: _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU'))),
+        ]),
+      ]),
+    ));
   }
 
   Widget _smallToggle(String label, bool active, Color color, VoidCallback onTap) {
-    return OutlinedButton(
+    return SizedBox(height: 40, child: OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         foregroundColor: active ? Colors.black : color,
-        backgroundColor: active ? color : Colors.transparent,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        minimumSize: const Size(0, 34),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        side: BorderSide(color: active ? color : color.withValues(alpha: 0.65), width: active ? 2 : 1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+        backgroundColor: active ? color : color.withValues(alpha: 0.035),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+        minimumSize: const Size(0, 38), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        side: BorderSide(color: active ? color : color.withValues(alpha: 0.75), width: active ? 2 : 1.2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
-    );
+      child: FittedBox(fit: BoxFit.scaleDown,
+        child: Text(label, maxLines: 1, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900))),
+    ));
   }
 
-  Widget _scoreButton({
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return FilledButton(
+  Widget _scoreButton({required String label, required Color color, required VoidCallback onPressed}) {
+    return SizedBox(width: double.infinity, height: 52, child: FilledButton(
       style: FilledButton.styleFrom(
-        backgroundColor: color.withValues(alpha: 0.16),
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-        minimumSize: const Size(52, 46),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: color.withValues(alpha: 0.12), foregroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+        minimumSize: const Size(0, 48), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        side: BorderSide(color: color.withValues(alpha: 0.75), width: 1.2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
       ),
       onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-      ),
-    );
+      child: FittedBox(fit: BoxFit.scaleDown,
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 21))),
+    ));
   }
 
   Widget _centerPanel() {
-    return SizedBox(
-      width: 190,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          const Text(
-            'Z-SCORE',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: goldColor,
-              fontSize: 14,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white12),
-            ),
-            child: FittedBox(
-              child: Text(
-                _formatTime(remainingSeconds),
-                style: TextStyle(
-                  color: remainingSeconds <= 10
-                      ? akaColor
-                      : Colors.white,
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-            ),
-          ),
-          if (matchFinished)
-            FadeTransition(
-              opacity: _winnerOpacity,
-              child: Text(
-                'WINNER: $_winner',
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: goldColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else
-            const Text(
-              'KUMITE • MATCH',
-              style: TextStyle(color: Colors.white54, fontSize: 11),
-            ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                tooltip: 'Subtract one second',
-                onPressed: () => _adjustTime(-1),
-                icon: const Icon(Icons.remove_circle_outline),
-                color: Colors.white70,
-                visualDensity: VisualDensity.compact,
-              ),
-              const Text('1 SEC', style: TextStyle(fontSize: 10, color: Colors.white54)),
-              IconButton(
-                tooltip: 'Add one second',
-                onPressed: () => _adjustTime(1),
-                icon: const Icon(Icons.add_circle_outline),
-                color: goldColor,
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
-          ),
-          FilledButton.icon(
-            onPressed: isRunning ? _pauseTimer : _startTimer,
-            icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
-            label: Text(isRunning ? 'PAUSE' : 'START'),
-          ),
-          OutlinedButton.icon(
-            onPressed: _undo,
-            icon: const Icon(Icons.undo, size: 16),
-            label: const Text('UNDO'),
-          ),
-        ],
-      ),
-    );
+    return SizedBox(width: 218, child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+      child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        const Text('Z-SCORE', textAlign: TextAlign.center,
+          style: TextStyle(color: goldColor, fontSize: 17, letterSpacing: 2.4, fontWeight: FontWeight.w900)),
+        Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+          decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: goldColor.withValues(alpha: 0.22))),
+          child: FittedBox(fit: BoxFit.scaleDown, child: Text(_formatTime(remainingSeconds),
+            style: TextStyle(color: remainingSeconds <= 15 ? akaColor : Colors.white,
+              fontSize: 48, fontWeight: FontWeight.w900,
+              fontFeatures: const [FontFeature.tabularFigures()])))),
+        if (matchFinished)
+          FadeTransition(opacity: _winnerOpacity, child: Text('WINNER: $_winner', textAlign: TextAlign.center,
+            maxLines: 2, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: goldColor, fontWeight: FontWeight.w900, fontSize: 12)))
+        else
+          const Text('KUMITE  •  MATCH', style: TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 0.7)),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          IconButton(tooltip: 'Subtract one second', onPressed: matchFinished ? null : () => _adjustTime(-1),
+            icon: const Icon(Icons.remove_circle_outline, size: 28), color: Colors.white70, visualDensity: VisualDensity.compact),
+          const Text('1 SEC', style: TextStyle(fontSize: 10, color: Colors.white54, letterSpacing: 1)),
+          IconButton(tooltip: 'Add one second', onPressed: matchFinished ? null : () => _adjustTime(1),
+            icon: const Icon(Icons.add_circle_outline, size: 28), color: goldColor, visualDensity: VisualDensity.compact),
+        ]),
+        SizedBox(width: double.infinity, height: 54, child: FilledButton.icon(
+          onPressed: matchFinished ? null : (isRunning ? _pauseTimer : _startTimer),
+          icon: Icon(isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 23),
+          label: Text(matchFinished ? 'MATCH ENDED' : (isRunning ? 'PAUSE' : 'START'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.8)),
+          style: FilledButton.styleFrom(backgroundColor: goldColor, foregroundColor: Colors.black,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
+        )),
+        SizedBox(width: double.infinity, height: 46, child: OutlinedButton.icon(
+          onPressed: isRunning ? _pauseTimer : null, icon: const Icon(Icons.pause_rounded, size: 18),
+          label: const Text('PAUSE', style: TextStyle(fontWeight: FontWeight.w800)),
+          style: OutlinedButton.styleFrom(foregroundColor: Colors.white70, side: const BorderSide(color: Colors.white24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
+        )),
+        SizedBox(width: double.infinity, height: 46, child: OutlinedButton.icon(
+          onPressed: history.isEmpty ? null : _undo, icon: const Icon(Icons.undo_rounded, size: 18),
+          label: const Text('UNDO', style: TextStyle(fontWeight: FontWeight.w800)),
+          style: OutlinedButton.styleFrom(foregroundColor: goldColor, side: BorderSide(color: goldColor.withValues(alpha: 0.65)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
+        )),
+      ]),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.sports_martial_arts, color: goldColor),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Z-SCORE SCOREBOARD',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    tooltip: 'Athlete names',
-                    onPressed: _editNames,
-                    icon: const Icon(Icons.edit),
-                  ),
-                  IconButton(
-                    tooltip: 'Match history',
-                    onPressed: _showHistory,
-                    icon: const Icon(Icons.history),
-                  ),
-                  IconButton(
-                    tooltip: 'Match duration',
-                    onPressed: _chooseDuration,
-                    icon: const Icon(Icons.timer_outlined),
-                  ),
-                  IconButton(
-                    tooltip: 'Reset match',
-                    onPressed: _resetMatch,
-                    icon: const Icon(Icons.restart_alt),
-                  ),
-                  IconButton(
-                    tooltip: 'Toggle system UI',
-                    onPressed: () async {
-                      isFullscreen = !isFullscreen;
-                      await SystemChrome.setEnabledSystemUIMode(
-                        isFullscreen
-                            ? SystemUiMode.immersiveSticky
-                            : SystemUiMode.edgeToEdge,
-                      );
-                    },
-                    icon: const Icon(Icons.fullscreen),
-                  ),
-                ],
-              ),
-              const Divider(color: Colors.white12),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _scorePanel(
-                      name: akaName,
-                      score: akaScore,
-                      color: akaColor,
-                      isAka: true,
-                    ),
-                    _centerPanel(),
-                    _scorePanel(
-                      name: aoName,
-                      score: aoScore,
-                      color: aoColor,
-                      isAka: false,
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.circle,
-                    size: 8,
-                    color: Colors.greenAccent,
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'READY',
-                    style: TextStyle(color: Colors.white54, fontSize: 10),
-                  ),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: _confirmFinish,
-                    icon: const Icon(Icons.flag, size: 15),
-                    label: const Text(
-                      'END MATCH',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: goldColor,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return Scaffold(body: SafeArea(child: Padding(
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      child: Column(children: [
+        SizedBox(height: 66, child: Row(children: [
+          ClipRRect(borderRadius: BorderRadius.circular(12),
+            child: Image.asset('assets/z_score_icon.png', width: 52, height: 52, fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(width: 52, height: 52,
+                decoration: BoxDecoration(color: panelColor, borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.sports_martial_arts, color: goldColor, size: 32)))),
+          const SizedBox(width: 12),
+          const Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Z-SCORE SCOREBOARD', maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.4, fontSize: 17)),
+            SizedBox(height: 3),
+            Text('KUMITE  •  MATCH CONTROL', maxLines: 1,
+              style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 1.2)),
+          ])),
+          _headerAction('Athlete names', Icons.edit_rounded, _editNames),
+          _headerAction('Match history', Icons.history_rounded, _showHistory),
+          _headerAction('Match duration', Icons.timer_outlined, _chooseDuration),
+          _headerAction('Switch sides', Icons.swap_horiz_rounded, () {
+            setState(() => sidesSwitched = !sidesSwitched);
+            _logEvent('SIDE POSITIONS SWITCHED');
+          }),
+          _headerAction('Reset match', Icons.restart_alt_rounded, _resetMatch),
+          _headerAction('Toggle fullscreen', Icons.fullscreen_rounded, () async {
+            isFullscreen = !isFullscreen;
+            await SystemChrome.setEnabledSystemUIMode(isFullscreen ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge);
+          }),
+        ])),
+        const Divider(color: Color(0xFF263140), height: 1),
+        Expanded(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          if (sidesSwitched) ...[
+            _scorePanel(name: aoName, score: aoScore, color: aoColor, isAka: false),
+            _centerPanel(),
+            _scorePanel(name: akaName, score: akaScore, color: akaColor, isAka: true),
+          ] else ...[
+            _scorePanel(name: akaName, score: akaScore, color: akaColor, isAka: true),
+            _centerPanel(),
+            _scorePanel(name: aoName, score: aoScore, color: aoColor, isAka: false),
+          ],
+        ])),
+        SizedBox(height: 38, child: Row(children: [
+          const Icon(Icons.circle, size: 8, color: Colors.greenAccent),
+          const SizedBox(width: 7),
+          Text(matchFinished ? 'MATCH FINISHED' : (isRunning ? 'MATCH IN PROGRESS' : 'READY'),
+            style: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
+          const Spacer(),
+          TextButton.icon(onPressed: _confirmFinish, icon: const Icon(Icons.flag_rounded, size: 16),
+            label: const Text('END MATCH', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.6)),
+            style: TextButton.styleFrom(foregroundColor: goldColor)),
+        ])),
+      ]),
+    )));
   }
+
+  Widget _headerAction(String tooltip, IconData icon, VoidCallback onPressed) => IconButton(
+    tooltip: tooltip, onPressed: onPressed, icon: Icon(icon, size: 24),
+    color: const Color(0xFFE8EEF7), padding: const EdgeInsets.symmetric(horizontal: 7),
+    constraints: const BoxConstraints(minWidth: 42, minHeight: 48), visualDensity: VisualDensity.compact,
+  );
 }
 
 class _MatchEvent {

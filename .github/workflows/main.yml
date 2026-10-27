@@ -35,28 +35,12 @@ jobs:
       - name: Generate Android platform files
         run: flutter create --platforms=android --project-name=karate_scoreboard .
 
-      - name: Generate app icon and audio assets
+      - name: Generate app icon
         run: |
           sudo apt-get update
           sudo apt-get install -y librsvg2-bin
           mkdir -p assets
           rsvg-convert -w 1024 -h 1024 assets/z_score_icon.svg -o assets/z_score_icon.png
-          python3 - <<'PY'
-          import math, struct, wave
-          def write_tone(path, notes, duration=0.12, rate=44100):
-              with wave.open(path, 'wb') as out:
-                  out.setnchannels(1); out.setsampwidth(2); out.setframerate(rate)
-                  frames = bytearray()
-                  for freq in notes:
-                      count = int(rate * duration)
-                      for i in range(count):
-                          envelope = min(1.0, i / 500, (count - i) / 500)
-                          sample = int(10000 * envelope * math.sin(2 * math.pi * freq * i / rate))
-                          frames.extend(struct.pack('<h', sample))
-                  out.writeframes(frames)
-          write_tone('assets/countdown.wav', [880], 0.10)
-          write_tone('assets/match_end.wav', [660, 880, 1100], 0.20)
-          PY
 
       - name: Set Android launcher name
         run: sed -i 's/android:label="karate_scoreboard"/android:label="Z-Score"/' android/app/src/main/AndroidManifest.xml

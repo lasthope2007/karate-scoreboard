@@ -1,15 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-<rect width="1024" height="1024" rx="210" fill="#050607"/>
-<path d="M220 565 L510 255 L775 255 L480 565 L710 565 L825 470 L700 675 L400 675 L565 495 L375 495 Z" fill="#fff" opacity=".97"/>
-<path d="M390 300 C370 265 400 220 445 228 L480 245 L500 260 L475 270 L465 310 L480 345 L458 365 L440 350 L420 365 L405 350 L390 330 Z" fill="#07090c"/>
-<path d="M415 355 L355 390 L330 450 L365 475 L405 420 L460 415 L520 440 L585 405 L610 425 L540 470 L455 460 L430 510 L390 500 L390 450 L350 490 L310 465 L330 405 Z" fill="#fff"/>
-<path d="M470 400 L600 385 L690 345 L725 365 L635 420 L520 450 Z" fill="#fff"/>
-<path d="M610 382 L765 335 L790 360 L660 430 Z" fill="#080a0d"/>
-<path d="M360 455 L430 475 L480 525 L460 555 L405 520 L355 510 Z" fill="#fff"/>
-<path d="M160 405 L270 405 L255 535 L145 535 L135 450 Z" fill="#e21b2d"/>
-<path d="M750 405 L860 405 L890 450 L890 535 L780 535 Z" fill="#1479ee"/>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#111722"/><stop offset="1" stop-color="#030508"/></linearGradient><linearGradient id="white" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dce4ee"/></linearGradient></defs>
+<rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+<path d="M220 565 510 255 775 255 480 565 710 565 825 470 700 675 400 675 565 495 375 495Z" fill="url(#white)"/>
+<path d="M390 300C370 265 400 220 445 228l35 17 20 15-25 10-10 40 15 35-22 20-18-15-20 15-15-15-15-20Z" fill="#07090c"/>
+<path d="m415 355-60 35-25 60 35 25 40-55 55-5 60 25 65-35 25 20-70 45-85-10-25 50-40-10v-50l-40 40-40-25 20-60Z" fill="#fff"/>
+<path d="m470 400 130-15 90-40 35 20-90 55-115 30Z" fill="#fff"/><path d="m610 382 155-47 25 25-130 70Z" fill="#080a0d"/>
+<path d="m360 455 70 20 50 50-20 30-55-35-50-10Z" fill="#fff"/>
+<path d="M160 405h110l-15 130H145l-10-85Z" fill="#ed1c35"/><path d="M750 405h110l30 45v85H780Z" fill="#1479ee"/>
 <g fill="#fff" font-family="Arial,sans-serif" font-weight="900" text-anchor="middle"><text x="200" y="500" font-size="82">0</text><text x="820" y="500" font-size="82">0</text></g>
-<path d="M160 550 H250" stroke="#e21b2d" stroke-width="12"/><path d="M775 550 H865" stroke="#1479ee" stroke-width="12"/>
-<text x="512" y="790" font-family="Arial,sans-serif" font-style="italic" font-weight="900" font-size="145" text-anchor="middle" fill="#fff">Z-Score</text>
-<path d="M350 815 L390 815 L400 785 L360 785 Z" fill="#e21b2d"/>
+<path d="M160 550h90" stroke="#ed1c35" stroke-width="12"/><path d="M775 550h90" stroke="#1479ee" stroke-width="12"/>
+<text x="512" y="790" font-family="Arial,sans-serif" font-style="italic" font-weight="900" font-size="145" text-anchor="middle" fill="#fff">Z-Score</text><path d="M350 815h40l10-30h-40Z" fill="#ed1c35"/>
 </svg>
