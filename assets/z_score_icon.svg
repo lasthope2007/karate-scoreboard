@@ -1,13 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#111722"/><stop offset="1" stop-color="#030508"/></linearGradient><linearGradient id="white" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#dce4ee"/></linearGradient></defs>
-<rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
-<path d="M220 565 510 255 775 255 480 565 710 565 825 470 700 675 400 675 565 495 375 495Z" fill="url(#white)"/>
-<path d="M390 300C370 265 400 220 445 228l35 17 20 15-25 10-10 40 15 35-22 20-18-15-20 15-15-15-15-20Z" fill="#07090c"/>
-<path d="m415 355-60 35-25 60 35 25 40-55 55-5 60 25 65-35 25 20-70 45-85-10-25 50-40-10v-50l-40 40-40-25 20-60Z" fill="#fff"/>
-<path d="m470 400 130-15 90-40 35 20-90 55-115 30Z" fill="#fff"/><path d="m610 382 155-47 25 25-130 70Z" fill="#080a0d"/>
-<path d="m360 455 70 20 50 50-20 30-55-35-50-10Z" fill="#fff"/>
-<path d="M160 405h110l-15 130H145l-10-85Z" fill="#ed1c35"/><path d="M750 405h110l30 45v85H780Z" fill="#1479ee"/>
-<g fill="#fff" font-family="Arial,sans-serif" font-weight="900" text-anchor="middle"><text x="200" y="500" font-size="82">0</text><text x="820" y="500" font-size="82">0</text></g>
-<path d="M160 550h90" stroke="#ed1c35" stroke-width="12"/><path d="M775 550h90" stroke="#1479ee" stroke-width="12"/>
-<text x="512" y="790" font-family="Arial,sans-serif" font-style="italic" font-weight="900" font-size="145" text-anchor="middle" fill="#fff">Z-Score</text><path d="M350 815h40l10-30h-40Z" fill="#ed1c35"/>
-</svg>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#080d18"/><stop offset=".55" stop-color="#03050a"/><stop offset="1" stop-color="#10040b"/></linearGradient><linearGradient id="edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00c8ff"/><stop offset=".48" stop-color="#142cff"/><stop offset="1" stop-color="#ff1744"/></linearGradient><linearGradient id="zfill" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".52" stop-color="#dce5f8"/><stop offset="1" stop-color="#a8b4d2"/></linearGradient><linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#25d9ff"/><stop offset="1" stop-color="#0752f4"/></linearGradient><linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ff2525"/><stop offset="1" stop-color="#d90026"/></linearGradient><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="13"/></filter></defs>
+<rect x="115" y="105" width="794" height="814" rx="155" fill="url(#bg)" stroke="url(#edge)" stroke-width="5"/><rect x="125" y="115" width="774" height="794" rx="145" fill="none" stroke="#24304d" stroke-width="2"/>
+<path d="M232 467 A280 280 0 0 1 640 194" fill="none" stroke="#078cff" stroke-width="10" opacity=".9"/><path d="M779 332 A280 280 0 0 1 696 711" fill="none" stroke="#fa173a" stroke-width="10" opacity=".85"/>
+<path d="M228 620 420 405 705 250 762 260 515 492 341 647 666 647 709 620 660 695 251 695Z" fill="#008fff" opacity=".6" filter="url(#glow)"/>
+<path d="M232 630 425 402 705 250 758 260 518 492 422 580 693 580 650 635 235 635Z" fill="url(#zfill)" stroke="#f8fbff" stroke-width="3" stroke-linejoin="round"/><path d="M232 630 425 402 705 250 758 260 518 492 422 580 693 580 650 635 235 635Z" fill="none" stroke="url(#edge)" stroke-width="5" stroke-linejoin="round" opacity=".95"/>
+<g fill="url(#blue)"><rect x="228" y="480" width="24" height="72" rx="10"/><rect x="270" y="438" width="24" height="114" rx="10"/><rect x="312" y="394" width="24" height="158" rx="10"/></g><g fill="url(#red)"><rect x="690" y="508" width="24" height="44" rx="10"/><rect x="732" y="470" width="24" height="82" rx="10"/><rect x="774" y="430" width="24" height="122" rx="10"/></g>
+<text x="512" y="795" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="22" fill="#f5f7ff">SCORE</text></svg>
