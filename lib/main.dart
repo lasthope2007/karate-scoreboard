@@ -531,14 +531,14 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
         shape: const CircleBorder(), clipBehavior: Clip.antiAlias,
         child: InkWell(
           customBorder: const CircleBorder(), onTap: () => _toggleSenshu(isAka),
-          child: SizedBox(width: 58, height: 58, child: Column(
+          child: SizedBox(width: 46, height: 46, child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(senshu ? Icons.flag_rounded : Icons.outlined_flag_rounded,
-                color: senshu ? Colors.black : color, size: 23),
+                color: senshu ? Colors.black : color, size: 19),
               const SizedBox(height: 2),
               Text('SENSHU', style: TextStyle(
-                color: senshu ? Colors.black : color, fontSize: 8,
+                color: senshu ? Colors.black : color, fontSize: 7,
                 fontWeight: FontWeight.w900, letterSpacing: 0.5)),
             ],
           )),
@@ -549,12 +549,12 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       Expanded(child: Divider(color: color.withValues(alpha: 0.45))),
       Padding(padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Text(label, style: TextStyle(color: color, fontSize: 10,
-          fontWeight: FontWeight.w900, letterSpacing: 1.4))),
+          fontWeight: FontWeight.w900, letterSpacing: 1.2))),
       Expanded(child: Divider(color: color.withValues(alpha: 0.45))),
     ]);
     return Expanded(child: Container(
       margin: const EdgeInsets.all(7),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: isWinner ? color.withValues(alpha: 0.20) : panelColor,
         borderRadius: BorderRadius.circular(20),
@@ -564,23 +564,23 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Row(children: [
           senshuButton,
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: color, fontSize: 27, fontWeight: FontWeight.w900, letterSpacing: 2.2)),
+              style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: 2.2)),
             if (isWinner) FadeTransition(opacity: _winnerOpacity,
               child: Text('WINNER', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 2))),
           ])),
-          const SizedBox(width: 58),
+          const SizedBox(width: 46),
         ]),
         FittedBox(fit: BoxFit.scaleDown, child: FadeTransition(
           opacity: isWinner ? _winnerOpacity : const AlwaysStoppedAnimation<double>(1),
           child: Text('$score', style: TextStyle(color: isWinner ? color : Colors.white,
-            fontSize: 94, height: 0.95, fontWeight: FontWeight.w900,
+            fontSize: 72, height: 0.92, fontWeight: FontWeight.w900,
             fontFeatures: const [FontFeature.tabularFigures()])))),
         Row(children: [
           Expanded(child: Text('IPPON  $ippon', textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w800))),
+            style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w800))),
           const Text('•', style: TextStyle(color: Colors.white38)),
           Expanded(child: Text('WAZA-ARI  $wazaAri', textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w800))),
@@ -612,13 +612,13 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   Widget _smallToggle(String label, bool active, Color color, VoidCallback onTap) {
-    return SizedBox(height: 40, child: OutlinedButton(
+    return SizedBox(height: 32, child: OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
         foregroundColor: active ? Colors.black : color,
         backgroundColor: active ? color : color.withValues(alpha: 0.035),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
-        minimumSize: const Size(0, 38), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: const Size(0, 32), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         side: BorderSide(color: active ? color : color.withValues(alpha: 0.75), width: active ? 2 : 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -628,11 +628,11 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   Widget _scoreButton({required String label, required Color color, required VoidCallback onPressed}) {
-    return SizedBox(width: double.infinity, height: 52, child: FilledButton(
+    return SizedBox(width: double.infinity, height: 44, child: FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: color.withValues(alpha: 0.12), foregroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
-        minimumSize: const Size(0, 48), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minimumSize: const Size(0, 42), tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         side: BorderSide(color: color.withValues(alpha: 0.75), width: 1.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
       ),
@@ -643,8 +643,8 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
   }
 
   Widget _centerPanel() {
-    return SizedBox(width: 218, child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+    return SizedBox(width: 200, child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
       child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         const Text('Z-SCORE', textAlign: TextAlign.center,
           style: TextStyle(color: goldColor, fontSize: 17, letterSpacing: 2.4, fontWeight: FontWeight.w900)),
@@ -653,7 +653,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
             border: Border.all(color: goldColor.withValues(alpha: 0.22))),
           child: FittedBox(fit: BoxFit.scaleDown, child: Text(_formatTime(remainingSeconds),
             style: TextStyle(color: remainingSeconds <= 15 ? akaColor : Colors.white,
-              fontSize: 48, fontWeight: FontWeight.w900,
+              fontSize: 42, fontWeight: FontWeight.w900,
               fontFeatures: const [FontFeature.tabularFigures()])))),
         if (matchFinished)
           FadeTransition(opacity: _winnerOpacity, child: Text('WINNER: $_winner', textAlign: TextAlign.center,
@@ -668,7 +668,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           IconButton(tooltip: 'Add one second', onPressed: matchFinished ? null : () => _adjustTime(1),
             icon: const Icon(Icons.add_circle_outline, size: 28), color: goldColor, visualDensity: VisualDensity.compact),
         ]),
-        SizedBox(width: double.infinity, height: 54, child: FilledButton.icon(
+        SizedBox(width: double.infinity, height: 46, child: FilledButton.icon(
           onPressed: matchFinished ? null : (isRunning ? _pauseTimer : _startTimer),
           icon: Icon(isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded, size: 23),
           label: Text(matchFinished ? 'MATCH ENDED' : (isRunning ? 'PAUSE' : 'START'),
@@ -676,7 +676,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           style: FilledButton.styleFrom(backgroundColor: goldColor, foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28))),
         )),
-        SizedBox(width: double.infinity, height: 46, child: OutlinedButton.icon(
+        SizedBox(width: double.infinity, height: 40, child: OutlinedButton.icon(
           onPressed: history.isEmpty ? null : _undo, icon: const Icon(Icons.undo_rounded, size: 18),
           label: const Text('UNDO', style: TextStyle(fontWeight: FontWeight.w800)),
           style: OutlinedButton.styleFrom(foregroundColor: goldColor, side: BorderSide(color: goldColor.withValues(alpha: 0.65)),
