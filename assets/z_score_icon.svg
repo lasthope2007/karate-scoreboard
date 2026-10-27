@@ -14,8 +14,8 @@
 <path d="M777 342 A278 278 0 0 1 697 713" fill="none" stroke="#ff2348" stroke-width="10" opacity=".9"/>
 <g fill="url(#blue)"><rect x="226" y="488" width="25" height="68" rx="10"/><rect x="268" y="445" width="25" height="111" rx="10"/><rect x="310" y="400" width="25" height="156" rx="10"/></g>
 <g fill="url(#red)"><rect x="690" y="510" width="25" height="46" rx="10"/><rect x="732" y="470" width="25" height="86" rx="10"/><rect x="774" y="426" width="25" height="130" rx="10"/></g>
-<path d="M282 640 L440 382 L715 252 L760 260 L525 493 L425 576 L694 576 L652 628 L282 628 Z" fill="#078cff" opacity=".8" filter="url(#glow)"/>
-<path d="M282 630 L420 405 L700 260 L758 260 L516 492 L422 578 L693 578 L650 630 Z" fill="url(#metal)" stroke="#f8fbff" stroke-width="3" stroke-linejoin="round"/>
-<path d="M282 630 L420 405 L700 260 L758 260 L516 492 L422 578 L693 578 L650 630 Z" fill="none" stroke="url(#rim)" stroke-width="4" stroke-linejoin="round"/>
+<path d="M300 615 L300 590 L545 350 L340 350 L390 280 L760 280 L760 305 L505 535 L700 535 L655 605 L300 605 Z" fill="#078cff" opacity=".8" filter="url(#glow)"/>
+<path d="M300 605 L300 585 L540 350 L300 350 L355 280 L760 280 L760 305 L510 535 L700 535 L655 605 Z" fill="url(#metal)" stroke="#f8fbff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M300 605 L300 585 L540 350 L300 350 L355 280 L760 280 L760 305 L510 535 L700 535 L655 605 Z" fill="none" stroke="url(#rim)" stroke-width="4" stroke-linejoin="round"/>
 <text x="512" y="795" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="19" fill="#f5f7ff">SCORE</text>
 </svg>
