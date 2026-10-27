@@ -53,30 +53,35 @@ class ZScoreSplashScreen extends StatefulWidget {
 class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _logoScale;
-  late final Animation<Offset> _logoSlide;
-  late final Animation<double> _titleFade;
-  late final Animation<Offset> _titleSlide;
+  late final Animation<double> _fade;
+  late final Animation<double> _scale;
+  late final Animation<Offset> _slide;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 1900),
     );
-    _logoScale = Tween<double>(begin: 0.72, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.68, curve: Curves.easeOutBack)),
-    );
-    _logoSlide = Tween<Offset>(begin: const Offset(-0.22, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.7, curve: Curves.easeOutCubic)),
-    );
-    _titleFade = CurvedAnimation(
+    _fade = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.24, 0.72, curve: Curves.easeOut),
+      curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
     );
-    _titleSlide = Tween<Offset>(begin: const Offset(0.16, 0), end: Offset.zero).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.22, 0.78, curve: Curves.easeOutCubic)),
+    _scale = Tween<double>(begin: 0.94, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOutCubic),
+      ),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(-0.08, 0),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.82, curve: Curves.easeOutCubic),
+      ),
     );
     _controller.forward();
     _openScoreboard();
@@ -107,132 +112,36 @@ class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF03050A),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.center,
-                radius: 1.0,
-                colors: [Color(0xFF111B2B), Color(0xFF03050A)],
-              ),
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (context, _) => Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SlideTransition(
-                      position: _logoSlide,
-                      child: ScaleTransition(
-                        scale: _logoScale,
-                        child: Container(
-                          width: 132,
-                          height: 132,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(27),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF078CFF).withValues(alpha: 0.18),
-                                blurRadius: 28,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Image.asset(
-                            'assets/z_score_icon.png',
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Center(
-                              child: Text(
-                                'Z',
-                                style: TextStyle(fontSize: 100, fontWeight: FontWeight.w900, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final imageWidth = (constraints.maxWidth * 0.88).clamp(280.0, 1040.0);
+          return Center(
+            child: FadeTransition(
+              opacity: _fade,
+              child: SlideTransition(
+                position: _slide,
+                child: ScaleTransition(
+                  scale: _scale,
+                  child: Image.asset(
+                    'assets/z_score_splash.png',
+                    width: imageWidth,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (_, __, ___) => const Text(
+                      'Z-SCORE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 42,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 5,
                       ),
                     ),
-                    const SizedBox(width: 22),
-                    Flexible(
-                      child: SlideTransition(
-                        position: _titleSlide,
-                        child: FadeTransition(
-                          opacity: _titleFade,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 300),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'Z-SCORE',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 38,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: 5,
-                                      height: 1,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 9),
-                                const Text(
-                                  'KUMITE SCOREBOARD',
-                                  maxLines: 1,
-                                  style: TextStyle(
-                                    color: Color(0xFF9BAAC2),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 2.1,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: SizedBox(
-                                    height: 3,
-                                    width: 190,
-                                    child: Stack(
-                                      children: [
-                                        const ColoredBox(color: Color(0xFF263248)),
-                                        Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: FractionallySizedBox(
-                                            widthFactor: _controller.value.clamp(0.05, 1.0),
-                                            child: const DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [Color(0xFF10CFFF), Color(0xFF286BFF), Color(0xFFFF244D)],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
