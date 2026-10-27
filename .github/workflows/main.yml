@@ -77,7 +77,11 @@ jobs:
           imports = """import java.io.FileInputStream
           import java.util.Properties
 
-          val keystoreProperties = Properties()
+          """
+          if "import java.io.FileInputStream" not in text:
+              text = imports + text
+
+          properties = """val keystoreProperties = Properties()
           val keystorePropertiesFile = rootProject.file("key.properties")
           if (keystorePropertiesFile.exists()) {
               keystoreProperties.load(FileInputStream(keystorePropertiesFile))
@@ -85,7 +89,10 @@ jobs:
 
           """
           if "val keystoreProperties = Properties()" not in text:
-              text = imports + text
+              marker = "}\\n\\nandroid {"
+              if marker not in text:
+                  raise SystemExit("Could not find Gradle plugins/android boundary")
+              text = text.replace(marker, "}\\n\\n" + properties + "android {", 1)
 
           signing = """    signingConfigs {
                   create("release") {
