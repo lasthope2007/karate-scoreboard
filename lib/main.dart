@@ -80,7 +80,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
     super.initState();
     _blinkController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 650),
     );
     _winnerOpacity = Tween<double>(begin: 0.25, end: 1).animate(
       CurvedAnimation(parent: _blinkController, curve: Curves.easeInOut),
@@ -563,7 +563,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
       ),
       child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Row(children: [
-          if (!isAka) senshuButton else const SizedBox(width: 58, height: 58),
+          senshuButton,
           const SizedBox(width: 8),
           Expanded(child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(name.toUpperCase(), maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -571,7 +571,7 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
             if (isWinner) FadeTransition(opacity: _winnerOpacity,
               child: Text('WINNER', style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 2))),
           ])),
-          const SizedBox(width: 66),
+          const SizedBox(width: 58),
         ]),
         FittedBox(fit: BoxFit.scaleDown, child: FadeTransition(
           opacity: isWinner ? _winnerOpacity : const AlwaysStoppedAnimation<double>(1),
@@ -607,7 +607,6 @@ class _ScoreboardPageState extends State<ScoreboardPage> with SingleTickerProvid
           const SizedBox(width: 7),
           Expanded(child: _smallToggle('HANSOKU', penalties.contains('HANSOKU'), color, () => _togglePenalty(isAka, 'HANSOKU'))),
         ]),
-        if (isAka) Center(child: senshuButton),
       ]),
     ));
   }
