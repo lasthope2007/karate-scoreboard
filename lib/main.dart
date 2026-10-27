@@ -48,22 +48,30 @@ class ZScoreSplashScreen extends StatefulWidget {
 class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _opacity;
-  late final Animation<double> _scale;
+  late final Animation<double> _logoScale;
+  late final Animation<Offset> _logoSlide;
+  late final Animation<double> _titleFade;
+  late final Animation<Offset> _titleSlide;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 1800),
     );
-    _opacity = CurvedAnimation(
+    _logoScale = Tween<double>(begin: 0.72, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.68, curve: Curves.easeOutBack)),
+    );
+    _logoSlide = Tween<Offset>(begin: const Offset(-0.22, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.7, curve: Curves.easeOutCubic)),
+    );
+    _titleFade = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.72, curve: Curves.easeOut),
+      curve: const Interval(0.24, 0.72, curve: Curves.easeOut),
     );
-    _scale = Tween<double>(begin: 0.78, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    _titleSlide = Tween<Offset>(begin: const Offset(0.16, 0), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0.22, 0.78, curve: Curves.easeOutCubic)),
     );
     _controller.forward();
     _openScoreboard();
@@ -75,7 +83,7 @@ class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder<void>(
         pageBuilder: (_, animation, __) => const ScoreboardPage(),
-        transitionDuration: const Duration(milliseconds: 250),
+        transitionDuration: const Duration(milliseconds: 300),
         transitionsBuilder: (_, animation, __, child) => FadeTransition(
           opacity: animation,
           child: child,
@@ -100,103 +108,116 @@ class _ZScoreSplashScreenState extends State<ZScoreSplashScreen>
           const DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(0, -0.15),
-                radius: 0.9,
-                colors: [Color(0xFF101B31), Color(0xFF03050A)],
-              ),
-            ),
-          ),
-          Positioned(
-            left: -70,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              width: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFF078CFF).withValues(alpha: 0.8),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF078CFF).withValues(alpha: 0.8),
-                    blurRadius: 35,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            right: -70,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              width: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF1744).withValues(alpha: 0.8),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFFFF1744).withValues(alpha: 0.8),
-                    blurRadius: 35,
-                    spreadRadius: 8,
-                  ),
-                ],
+                center: Alignment.center,
+                radius: 1.0,
+                colors: [Color(0xFF111B2B), Color(0xFF03050A)],
               ),
             ),
           ),
           Center(
-            child: FadeTransition(
-              opacity: _opacity,
-              child: ScaleTransition(
-                scale: _scale,
-                child: Column(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) => Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 220,
-                      height: 220,
-                      child: Image.asset(
-                        'assets/z_score_icon.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Container(
+                    SlideTransition(
+                      position: _logoSlide,
+                      child: ScaleTransition(
+                        scale: _logoScale,
+                        child: Container(
+                          width: 132,
+                          height: 132,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(42),
-                            border: Border.all(
-                              color: const Color(0xFF2589FF),
-                              width: 2,
-                            ),
+                            borderRadius: BorderRadius.circular(27),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF078CFF).withValues(alpha: 0.18),
+                                blurRadius: 28,
+                                spreadRadius: 1,
+                              ),
+                            ],
                           ),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Z',
-                            style: TextStyle(
-                              fontSize: 150,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              height: 1,
+                          clipBehavior: Clip.antiAlias,
+                          child: Image.asset(
+                            'assets/z_score_icon.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Text(
+                                'Z',
+                                style: TextStyle(fontSize: 100, fontWeight: FontWeight.w900, color: Colors.white),
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Z-SCORE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 27,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 8,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: 118,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: const LinearProgressIndicator(
-                          minHeight: 3,
-                          backgroundColor: Color(0xFF202838),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF2589FF),
+                    const SizedBox(width: 22),
+                    Flexible(
+                      child: SlideTransition(
+                        position: _titleSlide,
+                        child: FadeTransition(
+                          opacity: _titleFade,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 300),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Z-SCORE',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 38,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 5,
+                                      height: 1,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 9),
+                                const Text(
+                                  'KUMITE SCOREBOARD',
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    color: Color(0xFF9BAAC2),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 2.1,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: SizedBox(
+                                    height: 3,
+                                    width: 190,
+                                    child: Stack(
+                                      children: [
+                                        const ColoredBox(color: Color(0xFF263248)),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: FractionallySizedBox(
+                                            widthFactor: _controller.value.clamp(0.05, 1.0),
+                                            child: const DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [Color(0xFF10CFFF), Color(0xFF286BFF), Color(0xFFFF244D)],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
