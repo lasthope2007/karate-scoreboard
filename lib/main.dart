@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The scoreboard and its logo-motion intro are designed for landscape.
+  await SystemChrome.setPreferredOrientations(const [
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
   runApp(const KarateScoreboardApp());
 }
 
