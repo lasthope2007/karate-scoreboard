@@ -1,4 +1,3 @@
-
 name: Build Android APK
 
 on:
@@ -11,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Release APK
+    name: Build Signed Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -30,13 +29,10 @@ jobs:
           channel: stable
           cache: true
 
-      # This repository currently contains Dart source but no android/ platform folder.
-      # Generate the standard Android project files before building the APK.
+      # The repository generates the Android platform files during CI.
       - name: Generate Android platform files
         run: flutter create --platforms=android --project-name=karate_scoreboard .
 
-      # Pin a stable NDK instead of Flutter's newest default; this avoids flaky
-      # downloads of the newest NDK archive on hosted runners.
       - name: Install stable Android NDK
         run: |
           sed -i 's/ndkVersion = flutter.ndkVersion/ndkVersion = "27.0.12077973"/' android/app/build.gradle.kts
@@ -47,6 +43,71 @@ jobs:
             if [ "$attempt" -eq 3 ]; then exit 1; fi
             sleep 5
           done
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD ANDROID_KEY_ALIAS; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing GitHub Actions secret: $name"
+              exit 1
+            fi
+          done
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/zscore-release.jks
+          cat > android/key.properties <<EOF
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=zscore-release.jks
+          EOF
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("android/app/build.gradle.kts")
+          text = path.read_text()
+
+          imports = """import java.io.FileInputStream
+          import java.util.Properties
+
+          val keystoreProperties = Properties()
+          val keystorePropertiesFile = rootProject.file("key.properties")
+          if (keystorePropertiesFile.exists()) {
+              keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+          }
+
+          """
+          if "val keystoreProperties = Properties()" not in text:
+              text = imports + text
+
+          signing = """    signingConfigs {
+                  create("release") {
+                      keyAlias = keystoreProperties["keyAlias"] as String
+                      keyPassword = keystoreProperties["keyPassword"] as String
+                      storeFile = file(keystoreProperties["storeFile"] as String)
+                      storePassword = keystoreProperties["storePassword"] as String
+                  }
+              }
+
+          """
+          if 'create("release")' not in text:
+              text = text.replace("    buildTypes {", signing + "    buildTypes {", 1)
+
+          debug_line = 'signingConfig = signingConfigs.getByName("debug")'
+          if debug_line in text:
+              text = text.replace(debug_line, 'signingConfig = signingConfigs.getByName("release")', 1)
+          elif 'signingConfig = signingConfigs.getByName("release")' not in text:
+              text = text.replace('        release {', '        release {\n            signingConfig = signingConfigs.getByName("release")', 1)
+
+          path.write_text(text)
+          PY
 
       - name: Generate app icon
         run: |
@@ -61,7 +122,7 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-          
+
       - name: Generate launcher icons
         run: dart run flutter_launcher_icons
 
@@ -71,9 +132,15 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      - name: Verify APK signature
+        run: |
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          test -f "$APK"
+          "$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)/apksigner" verify --verbose "$APK"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: karate-elite-release-apk
+          name: z-score-signed-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
