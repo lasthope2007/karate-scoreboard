@@ -62,7 +62,7 @@ jobs:
           if not target_found:
               raise SystemExit("Could not find minSdk in Gradle file")
 
-          path.write_text("\\n".join(lines) + "\\n")
+          path.write_text("\n".join(lines) + "\n")
           print("Target SDK successfully set to 34")
           PY
 
